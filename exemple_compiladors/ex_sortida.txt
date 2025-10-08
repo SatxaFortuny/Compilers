@@ -1,0 +1,3 @@
+ID: x pren per valor: 27
+programa -> expressio :
+  expressio = 'Integer: 27'
