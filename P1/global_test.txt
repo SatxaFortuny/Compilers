@@ -1,0 +1,56 @@
+// Exemple de programa de prova per a la calculadora
+
+# Declaració de variables bàsiques
+int a
+float b, c
+string s
+bool l
+
+# Assignacions senzilles
+a := 5
+b := 3.14
+c := a + b * 2
+s := "Hola"
+l := true
+
+# Expressions aritmètiques amb precedència
+a := 2 + 3 * 4
+c := (2 + 3) * 4
+b := 2 ^ 3 + 5 % 2
+
+# Expressions booleanes
+l := a > b
+l := (a <= c) and not (b = 0)
+
+# Concatenació de cadenes
+s := s + " món"
+s := s + 123   // converteix el número en cadena
+
+# Funcions trigonomètriques
+b := sin(PI / 2)
+c := cos(0) + tan(PI / 4)
+
+# Funcions de cadenes
+s := "Programació"
+a := LEN(s)
+s := SUBSTR(s; 0; 7)
+
+# Ús de constants predefinides
+b := E ^ 2
+
+/* 
+--------------------
+Exemple amb estructures 
+--------------------
+*/
+struct Punto {
+    int x;
+    int y;
+} p1, p2
+
+p1.x := 10
+p1.y := 20
+p2.x := p1.x + 5
+p2.y := p1.y - 5
+
+// Fi del programa

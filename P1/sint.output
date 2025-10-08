@@ -1,0 +1,88 @@
+Grammar
+
+    0 $accept: programa $end
+
+    1 programa: expressio
+
+    2 expressio: ID ASSIGN INTEGER ENDLINE
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    ASSIGN <sense_valor> (258) 2
+    ENDLINE <sense_valor> (259) 2
+    INTEGER <enter> (260) 2
+    ID <ident> (261) 2
+
+
+Nonterminals, with rules where they appear
+
+    $accept (7)
+        on left: 0
+    programa <sense_valor> (8)
+        on left: 1
+        on right: 0
+    expressio <expr_val> (9)
+        on left: 2
+        on right: 1
+
+
+State 0
+
+    0 $accept: • programa $end
+
+    ID  shift, and go to state 1
+
+    programa   go to state 2
+    expressio  go to state 3
+
+
+State 1
+
+    2 expressio: ID • ASSIGN INTEGER ENDLINE
+
+    ASSIGN  shift, and go to state 4
+
+
+State 2
+
+    0 $accept: programa • $end
+
+    $end  shift, and go to state 5
+
+
+State 3
+
+    1 programa: expressio •
+
+    $default  reduce using rule 1 (programa)
+
+
+State 4
+
+    2 expressio: ID ASSIGN • INTEGER ENDLINE
+
+    INTEGER  shift, and go to state 6
+
+
+State 5
+
+    0 $accept: programa $end •
+
+    $default  accept
+
+
+State 6
+
+    2 expressio: ID ASSIGN INTEGER • ENDLINE
+
+    ENDLINE  shift, and go to state 7
+
+
+State 7
+
+    2 expressio: ID ASSIGN INTEGER ENDLINE •
+
+    $default  reduce using rule 2 (expressio)
