@@ -470,10 +470,12 @@ char *yytext;
 #line 1 "calc.l"
 #line 2 "calc.l"
     #include <stdio.h>
-#line 473 "lex.yy.c"
+    #include <stdlib.h>
+    #include "calc.tab.h"
+#line 475 "lex.yy.c"
 /* This option makes Flex keep an account of the number of lines (which increments each time it reads \n.)
 This way we keep track of where the error is if there happens to be one*/
-#line 476 "lex.yy.c"
+#line 478 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -690,10 +692,10 @@ YY_DECL
 		}
 
 	{
-#line 8 "calc.l"
+#line 10 "calc.l"
 
 
-#line 696 "lex.yy.c"
+#line 698 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -762,41 +764,43 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 10 "calc.l"
-{ printf("(%d) IGNORED: SPACE AND/OR TAB\n", yylineno); }
+#line 12 "calc.l"
+{ printf("(%d) IGNORED: SPACE OR TAB\n", yylineno); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 11 "calc.l"
+#line 13 "calc.l"
 { printf("(%d) IGNORED: SINGLE LINE COMMENT.\n", yylineno); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 12 "calc.l"
+#line 14 "calc.l"
 { printf("(%d) IGNORED: SINGLE LINE COMMENT #.\n", yylineno); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 13 "calc.l"
-{ printf("(%d) TRACKED: NUMBER\n", yylineno); }
+#line 15 "calc.l"
+{   yylval.ival = atoi(yytext);
+                printf("(%d) TRACKED: NUMBER (%d)\n", yylineno, yylval.ival); 
+                return NUMBER;}
 	YY_BREAK
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 14 "calc.l"
-{ printf("(%d) TRACKED: EOL\n", yylineno); }
+#line 18 "calc.l"
+{ printf("(%d) TRACKED: EOL\n", yylineno); return EOL;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 15 "calc.l"
+#line 19 "calc.l"
 { printf("(%d) TRACKED: LEXICAL ERROR\n", yylineno); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 18 "calc.l"
+#line 22 "calc.l"
 ECHO;
 	YY_BREAK
-#line 799 "lex.yy.c"
+#line 803 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1813,20 +1817,9 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 18 "calc.l"
+#line 22 "calc.l"
 
-int main(int argc, char **argv) {
-    printf("--- Iniciando Scanner (sólo Flex) ---\n");
-    
-    /* yylex() es la función que Flex genera. Empezará a escanear */
-    yylex();
-    
-    printf("--- Fin del Scanner ---\n");
-    return 0;
-}
 
-/* Flex nos pide esta función. Con 'return 1' le decimos */
-/* que hemos terminado cuando se acabe el archivo. */
 int yywrap() {
     return 1; /* 1 = no hay más archivos */
 }
