@@ -117,10 +117,15 @@ enum yysymbol_kind_t
   YYSYMBOL_K_STRING = 7,                   /* K_STRING  */
   YYSYMBOL_K_BOOL = 8,                     /* K_BOOL  */
   YYSYMBOL_EOL = 9,                        /* EOL  */
-  YYSYMBOL_YYACCEPT = 10,                  /* $accept  */
-  YYSYMBOL_program = 11,                   /* program  */
-  YYSYMBOL_line = 12,                      /* line  */
-  YYSYMBOL_assign = 13                     /* assign  */
+  YYSYMBOL_FLOAT_LITERAL = 10,             /* FLOAT_LITERAL  */
+  YYSYMBOL_STRING_LITERAL = 11,            /* STRING_LITERAL  */
+  YYSYMBOL_BOOL_LITERAL = 12,              /* BOOL_LITERAL  */
+  YYSYMBOL_ASSIGN = 13,                    /* ASSIGN  */
+  YYSYMBOL_YYACCEPT = 14,                  /* $accept  */
+  YYSYMBOL_program = 15,                   /* program  */
+  YYSYMBOL_line = 16,                      /* line  */
+  YYSYMBOL_declaration = 17,               /* declaration  */
+  YYSYMBOL_assignation = 18                /* assignation  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -448,19 +453,19 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   14
+#define YYLAST   23
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  10
+#define YYNTOKENS  14
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  4
+#define YYNNTS  5
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  11
+#define YYNRULES  16
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  19
+#define YYNSTATES  27
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   264
+#define YYMAXUTOK   268
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -500,15 +505,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9
+       5,     6,     7,     8,     9,    10,    11,    12,    13
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_int8 yyrline[] =
+static const yytype_uint8 yyrline[] =
 {
-       0,    32,    32,    33,    37,    38,    39,    40,    44,    56,
-      68,    80
+       0,    35,    35,    36,    40,    41,    42,    43,    44,    48,
+      60,    72,    84,    99,   114,   129,   146
 };
 #endif
 
@@ -525,8 +530,9 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
 static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "NUMBER", "ID",
-  "K_INT", "K_FLOAT", "K_STRING", "K_BOOL", "EOL", "$accept", "program",
-  "line", "assign", YY_NULLPTR
+  "K_INT", "K_FLOAT", "K_STRING", "K_BOOL", "EOL", "FLOAT_LITERAL",
+  "STRING_LITERAL", "BOOL_LITERAL", "ASSIGN", "$accept", "program", "line",
+  "declaration", "assignation", YY_NULLPTR
 };
 
 static const char *
@@ -550,8 +556,9 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -8,     0,    -8,    -7,    -5,     6,     7,     8,     9,    -8,
-      -8,     5,    -8,    -8,    -8,    -8,    -8,    -8,    -8
+      -8,     0,    -8,    -7,     2,    -1,     9,    10,    11,    12,
+      -8,    -8,    13,    14,    -8,    -8,     7,    -8,    -8,    -8,
+      -8,    -8,    -8,    -8,    -8,    -8,    -8
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -559,20 +566,21 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       2,     0,     1,     0,     0,     0,     0,     0,     0,     6,
-       3,     0,     7,     4,     8,     9,    10,    11,     5
+       2,     0,     1,     0,     0,     0,     0,     0,     0,     0,
+       7,     3,     0,     0,     8,     4,     0,     9,    10,    11,
+      12,     5,     6,    13,    14,    15,    16
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -8,    -8,    -8,    -8
+      -8,    -8,    -8,    -8,    -8
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     1,    10,    11
+       0,     1,    11,    12,    13
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -580,36 +588,39 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       2,     3,    12,     4,    13,     5,     6,     7,     8,     9,
-      14,    15,    16,    17,    18
+       2,     3,    14,     4,     5,     6,     7,     8,     9,    10,
+      23,    15,    16,    17,    18,    19,    20,    24,    25,    26,
+       0,     0,    21,    22
 };
 
 static const yytype_int8 yycheck[] =
 {
-       0,     1,     9,     3,     9,     5,     6,     7,     8,     9,
-       4,     4,     4,     4,     9
+       0,     1,     9,     3,     4,     5,     6,     7,     8,     9,
+       3,     9,    13,     4,     4,     4,     4,    10,    11,    12,
+      -1,    -1,     9,     9
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,    11,     0,     1,     3,     5,     6,     7,     8,     9,
-      12,    13,     9,     9,     4,     4,     4,     4,     9
+       0,    15,     0,     1,     3,     4,     5,     6,     7,     8,
+       9,    16,    17,    18,     9,     9,    13,     4,     4,     4,
+       4,     9,     9,     3,    10,    11,    12
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    10,    11,    11,    12,    12,    12,    12,    13,    13,
-      13,    13
+       0,    14,    15,    15,    16,    16,    16,    16,    16,    17,
+      17,    17,    17,    18,    18,    18,    18
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     0,     2,     2,     2,     1,     2,     2,     2,
-       2,     2
+       0,     2,     0,     2,     2,     2,     2,     1,     2,     2,
+       2,     2,     2,     3,     3,     3,     3
 };
 
 
@@ -1073,31 +1084,37 @@ yyreduce:
   switch (yyn)
     {
   case 4: /* line: NUMBER EOL  */
-#line 37 "calc.y"
-               { printf("BISON: NUMBER (%d) + EOL\n", (yyvsp[-1].ival)); }
-#line 1079 "calc.tab.c"
-    break;
-
-  case 5: /* line: assign EOL  */
-#line 38 "calc.y"
-                 { printf("BISON: ASSIGNATION TRACKED.\n"); }
-#line 1085 "calc.tab.c"
-    break;
-
-  case 6: /* line: EOL  */
-#line 39 "calc.y"
-                 { printf("BISON: EOL\n"); }
-#line 1091 "calc.tab.c"
-    break;
-
-  case 7: /* line: error EOL  */
 #line 40 "calc.y"
-                 { printf("BISON: Semantic error. Jumping to the next line.\n"); yyerrok; }
-#line 1097 "calc.tab.c"
+               { printf("BISON: NUMBER (%d) + EOL\n", (yyvsp[-1].ival)); }
+#line 1090 "calc.tab.c"
     break;
 
-  case 8: /* assign: K_INT ID  */
+  case 5: /* line: declaration EOL  */
+#line 41 "calc.y"
+                      { printf("BISON: DECLARATION TRACKED.\n"); }
+#line 1096 "calc.tab.c"
+    break;
+
+  case 6: /* line: assignation EOL  */
+#line 42 "calc.y"
+                      { printf("BISON: ASSIGNATION TRACKED.\n"); }
+#line 1102 "calc.tab.c"
+    break;
+
+  case 7: /* line: EOL  */
+#line 43 "calc.y"
+                 { printf("BISON: EOL\n"); }
+#line 1108 "calc.tab.c"
+    break;
+
+  case 8: /* line: error EOL  */
 #line 44 "calc.y"
+                 { printf("BISON: Semantic error. Jumping to the next line.\n"); yyerrok; }
+#line 1114 "calc.tab.c"
+    break;
+
+  case 9: /* declaration: K_INT ID  */
+#line 48 "calc.y"
              {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_INT;
@@ -1110,11 +1127,11 @@ yyreduce:
             printf("BISON: (%s) -> INTEGER.\n", (yyvsp[0].sval));
         }
     }
-#line 1114 "calc.tab.c"
+#line 1131 "calc.tab.c"
     break;
 
-  case 9: /* assign: K_FLOAT ID  */
-#line 56 "calc.y"
+  case 10: /* declaration: K_FLOAT ID  */
+#line 60 "calc.y"
                  {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_FLOAT;
@@ -1127,11 +1144,11 @@ yyreduce:
             printf("BISON: (%s) -> FLOAT.\n", (yyvsp[0].sval));
         }
     }
-#line 1131 "calc.tab.c"
+#line 1148 "calc.tab.c"
     break;
 
-  case 10: /* assign: K_STRING ID  */
-#line 68 "calc.y"
+  case 11: /* declaration: K_STRING ID  */
+#line 72 "calc.y"
                   {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_STRING;
@@ -1144,11 +1161,11 @@ yyreduce:
             printf("BISON: (%s) -> STRING.\n", (yyvsp[0].sval));
         }
     }
-#line 1148 "calc.tab.c"
+#line 1165 "calc.tab.c"
     break;
 
-  case 11: /* assign: K_BOOL ID  */
-#line 80 "calc.y"
+  case 12: /* declaration: K_BOOL ID  */
+#line 84 "calc.y"
                 {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_BOOL;
@@ -1161,11 +1178,93 @@ yyreduce:
             printf("BISON: (%s) -> BOOL.\n", (yyvsp[0].sval));
         }
     }
-#line 1165 "calc.tab.c"
+#line 1182 "calc.tab.c"
+    break;
+
+  case 13: /* assignation: ID ASSIGN NUMBER  */
+#line 99 "calc.y"
+                     {
+        TokenValue *s;
+        if (sym_lookup((yyvsp[-2].sval), &s) == SYMTAB_NOT_FOUND) {
+            yyerror("SEMANTIC ERROR: Variable not found");
+            free((yyvsp[-2].sval));
+        } else {
+            if (s->type != TYPE_INT) {
+                yyerror("SEMANTIC ERROR: Uncompatible assignation");
+            } else {
+                s->value.i_val = (yyvsp[0].ival);
+                s->inicialized = true;
+                printf("BISON: Assigned %s := %d\n", (yyvsp[-2].sval), (yyvsp[0].ival));
+            }
+        }
+    }
+#line 1202 "calc.tab.c"
+    break;
+
+  case 14: /* assignation: ID ASSIGN FLOAT_LITERAL  */
+#line 114 "calc.y"
+                              {
+        TokenValue *s;
+        if (sym_lookup((yyvsp[-2].sval), &s) == SYMTAB_NOT_FOUND) {
+            yyerror("SEMANTIC ERROR: Variable not found");
+            free((yyvsp[-2].sval));
+        } else {
+            if (s->type != TYPE_FLOAT) {
+                yyerror("SEMANTIC ERROR: Uncompatible assignation");
+            } else {
+                s->value.f_val = (yyvsp[0].fval);
+                s->inicialized = true;
+                printf("BISON: Assigned %s := %f\n", (yyvsp[-2].sval), (yyvsp[0].fval));
+            }
+        }
+    }
+#line 1222 "calc.tab.c"
+    break;
+
+  case 15: /* assignation: ID ASSIGN STRING_LITERAL  */
+#line 129 "calc.y"
+                               {
+        TokenValue *s;
+        if (sym_lookup((yyvsp[-2].sval), &s) == SYMTAB_NOT_FOUND) {
+            yyerror("SEMANTIC ERROR: Variable not found");
+            free((yyvsp[-2].sval));
+            free((yyvsp[0].sval));
+        } else {
+            if (s->type != TYPE_STRING) {
+                yyerror("SEMANTIC ERROR: Uncompatible assignation");
+            } else {
+                if (s->inicialized && s->value.s_val) free(s->value.s_val);
+                s->value.s_val = (yyvsp[0].sval); 
+                s->inicialized = true;
+                printf("BISON: Assigned %s := \"%s\"\n", (yyvsp[-2].sval), (yyvsp[0].sval));
+            }
+        }
+    }
+#line 1244 "calc.tab.c"
+    break;
+
+  case 16: /* assignation: ID ASSIGN BOOL_LITERAL  */
+#line 146 "calc.y"
+                             {
+        TokenValue *s;
+        if (sym_lookup((yyvsp[-2].sval), &s) == SYMTAB_NOT_FOUND) {
+            yyerror("SEMANTIC ERROR: Variable not found");
+            free((yyvsp[-2].sval));
+        } else {
+            if (s->type != TYPE_BOOL) {
+                yyerror("SEMANTIC ERROR: Uncompatible assignation");
+            } else {
+                s->value.b_val = (yyvsp[0].ival); 
+                s->inicialized = true;
+                printf("BISON: Assigned %s := %s\n", (yyvsp[-2].sval), (yyvsp[0].ival) ? "true" : "false");
+            }
+        }
+    }
+#line 1264 "calc.tab.c"
     break;
 
 
-#line 1169 "calc.tab.c"
+#line 1268 "calc.tab.c"
 
       default: break;
     }
@@ -1358,7 +1457,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 94 "calc.y"
+#line 163 "calc.y"
 
 
 void yyerror(const char *s) {

@@ -25,7 +25,10 @@ extern int yylineno;
 %token K_STRING
 %token K_BOOL
 %token EOL 
-
+%token <fval> FLOAT_LITERAL 
+%token <sval> STRING_LITERAL 
+%token <ival> BOOL_LITERAL   
+%token ASSIGN              
 %%
 
 /* Now we will try to classify everything into a program. Which is defined by a series of lines */
@@ -35,12 +38,13 @@ program:
 
 line:
     NUMBER EOL { printf("BISON: NUMBER (%d) + EOL\n", $1); }
-    | assign EOL { printf("BISON: ASSIGNATION TRACKED.\n"); }
+    | declaration EOL { printf("BISON: DECLARATION TRACKED.\n"); }
+    | assignation EOL { printf("BISON: ASSIGNATION TRACKED.\n"); }
     | EOL        { printf("BISON: EOL\n"); }
-    | error EOL  { printf("BISON: Semantic error. Jumping to the next line.\n"); yyerrok; }
+    | error EOL  { printf("BISON: Detected error. Jumping to the next line.\n"); yyerrok; }
     ;
 
-assign:
+declaration:
     K_INT ID {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_INT;
@@ -87,6 +91,71 @@ assign:
             free($2);
         } else {
             printf("BISON: (%s) -> BOOL.\n", $2);
+        }
+    }
+;
+
+assignation:
+    ID ASSIGN NUMBER {
+        TokenValue *s;
+        if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
+            yyerror("SEMANTIC ERROR: Variable not found");
+            free($1);
+        } else {
+            if (s->type != TYPE_INT) {
+                yyerror("SEMANTIC ERROR: Uncompatible assignation");
+            } else {
+                s->value.i_val = $3;
+                s->inicialized = true;
+                printf("BISON: Assigned %s := %d\n", $1, $3);
+            }
+        }
+    }
+    | ID ASSIGN FLOAT_LITERAL {
+        TokenValue *s;
+        if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
+            yyerror("SEMANTIC ERROR: Variable not found");
+            free($1);
+        } else {
+            if (s->type != TYPE_FLOAT) {
+                yyerror("SEMANTIC ERROR: Uncompatible assignation");
+            } else {
+                s->value.f_val = $3;
+                s->inicialized = true;
+                printf("BISON: Assigned %s := %f\n", $1, $3);
+            }
+        }
+    }
+    | ID ASSIGN STRING_LITERAL {
+        TokenValue *s;
+        if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
+            yyerror("SEMANTIC ERROR: Variable not found");
+            free($1);
+            free($3);
+        } else {
+            if (s->type != TYPE_STRING) {
+                yyerror("SEMANTIC ERROR: Uncompatible assignation");
+            } else {
+                if (s->inicialized && s->value.s_val) free(s->value.s_val);
+                s->value.s_val = $3; 
+                s->inicialized = true;
+                printf("BISON: Assigned %s := \"%s\"\n", $1, $3);
+            }
+        }
+    }
+    | ID ASSIGN BOOL_LITERAL {
+        TokenValue *s;
+        if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
+            yyerror("SEMANTIC ERROR: Variable not found");
+            free($1);
+        } else {
+            if (s->type != TYPE_BOOL) {
+                yyerror("SEMANTIC ERROR: Uncompatible assignation");
+            } else {
+                s->value.b_val = $3; 
+                s->inicialized = true;
+                printf("BISON: Assigned %s := %s\n", $1, $3 ? "true" : "false");
+            }
         }
     }
     ;

@@ -60,7 +60,11 @@ extern int yydebug;
     K_FLOAT = 261,                 /* K_FLOAT  */
     K_STRING = 262,                /* K_STRING  */
     K_BOOL = 263,                  /* K_BOOL  */
-    EOL = 264                      /* EOL  */
+    EOL = 264,                     /* EOL  */
+    FLOAT_LITERAL = 265,           /* FLOAT_LITERAL  */
+    STRING_LITERAL = 266,          /* STRING_LITERAL  */
+    BOOL_LITERAL = 267,            /* BOOL_LITERAL  */
+    ASSIGN = 268                   /* ASSIGN  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -76,7 +80,7 @@ union YYSTYPE
     char *sval;
     int bval;
 
-#line 80 "calc.tab.h"
+#line 84 "calc.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

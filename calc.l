@@ -18,7 +18,24 @@ This way we keep track of where the error is if there happens to be one*/
                 return K_STRING; }
 "bool"       {   printf("(%d)TRACKED: Bool\n", yylineno);
                 return K_BOOL; }
-
+"true"       {
+                printf("(%d) TRACKED: BOOL_LITERAL (true)\n", yylineno);
+                yylval.ival = 1;
+                return BOOL_LITERAL; }
+"false"      {
+                printf("(%d) TRACKED: BOOL_LITERAL (false)\n", yylineno);
+                yylval.ival = 0;
+                return BOOL_LITERAL; }
+[0-9]+\.[0-9]+ {
+                yylval.fval = atof(yytext);
+                printf("(%d) TRACKED: FLOAT_LITERAL (%f)\n", yylineno, yylval.fval);
+                return FLOAT_LITERAL; }
+\"[^"\n]*\" {
+                yylval.sval = strdup(yytext + 1);
+                yylval.sval[strlen(yylval.sval) - 1] = '\0'; 
+                printf("(%d) TRACKED: STRING_LITERAL (%s)\n", yylineno, yylval.sval);
+                return STRING_LITERAL;
+            }
 [ \t]+      { printf("(%d) IGNORED: SPACE OR TAB\n", yylineno); }
 "//".*      { printf("(%d) IGNORED: SINGLE LINE COMMENT.\n", yylineno); }
 "#".*       { printf("(%d) IGNORED: SINGLE LINE COMMENT #.\n", yylineno); }
@@ -31,6 +48,9 @@ This way we keep track of where the error is if there happens to be one*/
     printf("(%d) TRACKED: ID (%s)\n", yylineno, yylval.sval);
     return ID;
 }
+":="         {
+                printf("(%d) TRACKED: ASSIGN (:=)\n", yylineno);
+                return ASSIGN; }
 .           { printf("(%d) TRACKED: LEXICAL ERROR\n", yylineno); }
 
 %%
