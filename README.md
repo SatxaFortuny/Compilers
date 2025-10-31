@@ -51,4 +51,3 @@ wake up
 (3) TRACKED: LEXICAL ERROR
 (4) TRACKED: EOL
 BISON: EOL
-text ```
