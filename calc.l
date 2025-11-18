@@ -48,6 +48,12 @@ This way we keep track of where the error is if there happens to be one*/
     printf("(%d) TRACKED: ID (%s)\n", yylineno, yylval.sval);
     return ID;
 }
+"+"          { return '+'; }
+"-"          { return '-'; }
+"*"          { return '*'; }
+"/"          { return '/'; }
+"("          { return '('; }
+")"          { return ')'; }
 ":="         {
                 printf("(%d) TRACKED: ASSIGN (:=)\n", yylineno);
                 return ASSIGN; }

@@ -22,4 +22,13 @@ typedef struct TokenValue {
     } value;
 } TokenValue;
 
+typedef struct TempValue {
+    TypeData type;
+    union {
+        int   i_val;
+        float f_val;
+        char *s_val;
+        bool  b_val;
+    } value;
+} TempValue;
 #endif

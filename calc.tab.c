@@ -71,6 +71,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "value.h"
 #include "symtab.h"
 
@@ -79,7 +80,11 @@ int yylex(void);
 void yyerror(const char *s);
 extern int yylineno;
 
-#line 83 "calc.tab.c"
+void print_result(struct TempValue *res);
+
+char *strdup(const char *s);
+
+#line 88 "calc.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -121,11 +126,20 @@ enum yysymbol_kind_t
   YYSYMBOL_STRING_LITERAL = 11,            /* STRING_LITERAL  */
   YYSYMBOL_BOOL_LITERAL = 12,              /* BOOL_LITERAL  */
   YYSYMBOL_ASSIGN = 13,                    /* ASSIGN  */
-  YYSYMBOL_YYACCEPT = 14,                  /* $accept  */
-  YYSYMBOL_program = 15,                   /* program  */
-  YYSYMBOL_line = 16,                      /* line  */
-  YYSYMBOL_declaration = 17,               /* declaration  */
-  YYSYMBOL_assignation = 18                /* assignation  */
+  YYSYMBOL_14_ = 14,                       /* '+'  */
+  YYSYMBOL_15_ = 15,                       /* '-'  */
+  YYSYMBOL_16_ = 16,                       /* '*'  */
+  YYSYMBOL_17_ = 17,                       /* '/'  */
+  YYSYMBOL_18_ = 18,                       /* '('  */
+  YYSYMBOL_19_ = 19,                       /* ')'  */
+  YYSYMBOL_YYACCEPT = 20,                  /* $accept  */
+  YYSYMBOL_program = 21,                   /* program  */
+  YYSYMBOL_line = 22,                      /* line  */
+  YYSYMBOL_expression = 23,                /* expression  */
+  YYSYMBOL_term = 24,                      /* term  */
+  YYSYMBOL_atom = 25,                      /* atom  */
+  YYSYMBOL_declaration = 26,               /* declaration  */
+  YYSYMBOL_assignation = 27                /* assignation  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -453,16 +467,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   23
+#define YYLAST   39
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  14
+#define YYNTOKENS  20
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  5
+#define YYNNTS  8
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  16
+#define YYNRULES  26
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  27
+#define YYNSTATES  43
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   268
@@ -483,7 +497,7 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+      18,    19,    16,    14,     2,    15,     2,    17,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -510,10 +524,11 @@ static const yytype_int8 yytranslate[] =
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_int16 yyrline[] =
 {
-       0,    35,    35,    36,    40,    41,    42,    43,    44,    48,
-      60,    72,    84,    99,   114,   129,   146
+       0,    45,    45,    46,    50,    55,    56,    57,    58,    62,
+      63,    93,   125,   126,   156,   209,   214,   219,   251,   257,
+     269,   281,   293,   308,   323,   338,   355
 };
 #endif
 
@@ -531,7 +546,8 @@ static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "NUMBER", "ID",
   "K_INT", "K_FLOAT", "K_STRING", "K_BOOL", "EOL", "FLOAT_LITERAL",
-  "STRING_LITERAL", "BOOL_LITERAL", "ASSIGN", "$accept", "program", "line",
+  "STRING_LITERAL", "BOOL_LITERAL", "ASSIGN", "'+'", "'-'", "'*'", "'/'",
+  "'('", "')'", "$accept", "program", "line", "expression", "term", "atom",
   "declaration", "assignation", YY_NULLPTR
 };
 
@@ -556,9 +572,11 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -8,     0,    -8,    -7,     2,    -1,     9,    10,    11,    12,
-      -8,    -8,    13,    14,    -8,    -8,     7,    -8,    -8,    -8,
-      -8,    -8,    -8,    -8,    -8,    -8,    -8
+      -8,     0,    -8,    -7,    -8,     7,    22,    24,    30,    33,
+      -8,    -8,     9,    -8,     2,    14,    -8,     6,    29,    -8,
+      11,    -8,    -8,    -8,    -8,    -8,    10,    -8,     9,     9,
+       9,     9,    -8,    -8,    -8,    -8,    -8,    -8,    -8,    14,
+      14,    -8,    -8
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -566,21 +584,23 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       2,     0,     1,     0,     0,     0,     0,     0,     0,     0,
-       7,     3,     0,     0,     8,     4,     0,     9,    10,    11,
-      12,     5,     6,    13,    14,    15,    16
+       2,     0,     1,     0,    15,    17,     0,     0,     0,     0,
+       7,    16,     0,     3,     0,     9,    12,     0,     0,     8,
+       0,    19,    20,    21,    22,    17,     0,     4,     0,     0,
+       0,     0,     5,     6,    23,    24,    25,    26,    18,    10,
+      11,    13,    14
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -8,    -8,    -8,    -8,    -8
+      -8,    -8,    -8,    27,     4,     5,    -8,    -8
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     1,    11,    12,    13
+       0,     1,    13,    14,    15,    16,    17,    18
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -588,38 +608,44 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       2,     3,    14,     4,     5,     6,     7,     8,     9,    10,
-      23,    15,    16,    17,    18,    19,    20,    24,    25,    26,
-       0,     0,    21,    22
+       2,     3,    19,     4,     5,     6,     7,     8,     9,    10,
+      11,    27,     4,    25,    34,    32,    28,    29,    12,    11,
+      20,    35,    36,    37,    28,    29,    21,    12,    22,    38,
+      30,    31,    39,    40,    23,    41,    42,    24,    33,    26
 };
 
 static const yytype_int8 yycheck[] =
 {
        0,     1,     9,     3,     4,     5,     6,     7,     8,     9,
-       3,     9,    13,     4,     4,     4,     4,    10,    11,    12,
-      -1,    -1,     9,     9
+      10,     9,     3,     4,     3,     9,    14,    15,    18,    10,
+      13,    10,    11,    12,    14,    15,     4,    18,     4,    19,
+      16,    17,    28,    29,     4,    30,    31,     4,     9,    12
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,    15,     0,     1,     3,     4,     5,     6,     7,     8,
-       9,    16,    17,    18,     9,     9,    13,     4,     4,     4,
-       4,     9,     9,     3,    10,    11,    12
+       0,    21,     0,     1,     3,     4,     5,     6,     7,     8,
+       9,    10,    18,    22,    23,    24,    25,    26,    27,     9,
+      13,     4,     4,     4,     4,     4,    23,     9,    14,    15,
+      16,    17,     9,     9,     3,    10,    11,    12,    19,    24,
+      24,    25,    25
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    14,    15,    15,    16,    16,    16,    16,    16,    17,
-      17,    17,    17,    18,    18,    18,    18
+       0,    20,    21,    21,    22,    22,    22,    22,    22,    23,
+      23,    23,    24,    24,    24,    25,    25,    25,    25,    26,
+      26,    26,    26,    27,    27,    27,    27
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     0,     2,     2,     2,     2,     1,     2,     2,
+       0,     2,     0,     2,     2,     2,     2,     1,     2,     1,
+       3,     3,     1,     3,     3,     1,     1,     1,     3,     2,
        2,     2,     2,     3,     3,     3,     3
 };
 
@@ -1083,38 +1109,278 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 4: /* line: NUMBER EOL  */
-#line 40 "calc.y"
-               { printf("BISON: NUMBER (%d) + EOL\n", (yyvsp[-1].ival)); }
-#line 1090 "calc.tab.c"
+  case 4: /* line: expression EOL  */
+#line 50 "calc.y"
+                    { 
+        printf("BISON: Result: ");
+        print_result((yyvsp[-1].expr)); 
+        free((yyvsp[-1].expr)); 
+    }
+#line 1120 "calc.tab.c"
     break;
 
   case 5: /* line: declaration EOL  */
-#line 41 "calc.y"
+#line 55 "calc.y"
                       { printf("BISON: DECLARATION TRACKED.\n"); }
-#line 1096 "calc.tab.c"
+#line 1126 "calc.tab.c"
     break;
 
   case 6: /* line: assignation EOL  */
-#line 42 "calc.y"
+#line 56 "calc.y"
                       { printf("BISON: ASSIGNATION TRACKED.\n"); }
-#line 1102 "calc.tab.c"
+#line 1132 "calc.tab.c"
     break;
 
   case 7: /* line: EOL  */
-#line 43 "calc.y"
+#line 57 "calc.y"
                  { printf("BISON: EOL\n"); }
-#line 1108 "calc.tab.c"
+#line 1138 "calc.tab.c"
     break;
 
   case 8: /* line: error EOL  */
-#line 44 "calc.y"
-                 { printf("BISON: Semantic error. Jumping to the next line.\n"); yyerrok; }
-#line 1114 "calc.tab.c"
+#line 58 "calc.y"
+                 { printf("BISON: Detected error. Jumping to the next line.\n"); yyerrok; }
+#line 1144 "calc.tab.c"
     break;
 
-  case 9: /* declaration: K_INT ID  */
-#line 48 "calc.y"
+  case 9: /* expression: term  */
+#line 62 "calc.y"
+         { (yyval.expr) = (yyvsp[0].expr); }
+#line 1150 "calc.tab.c"
+    break;
+
+  case 10: /* expression: expression '+' term  */
+#line 63 "calc.y"
+                          {
+        TempValue *res1 = (yyvsp[-2].expr);
+        TempValue *res2 = (yyvsp[0].expr);
+        
+        if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
+            res1->value.i_val = res1->value.i_val + res2->value.i_val;
+            free(res2);
+            (yyval.expr) = res1;
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_FLOAT) {
+            res1->value.f_val = res1->value.f_val + res2->value.f_val;
+            free(res2);
+            (yyval.expr) = res1;
+        }
+        else if (res1->type == TYPE_INT && res2->type == TYPE_FLOAT) {
+            res1->type = TYPE_FLOAT;
+            res1->value.f_val = (float)res1->value.i_val + res2->value.f_val;
+            free(res2);
+            (yyval.expr) = res1;
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_INT) {
+            res1->value.f_val = res1->value.f_val + (float)res2->value.i_val;
+            free(res2);
+            (yyval.expr) = res1;
+        }
+        else {
+            yyerror("Semanthic error: Uncompatible type for '+'");
+            (yyval.expr) = 0;
+        }
+    }
+#line 1185 "calc.tab.c"
+    break;
+
+  case 11: /* expression: expression '-' term  */
+#line 93 "calc.y"
+                          {
+        TempValue *res1 = (yyvsp[-2].expr);
+        TempValue *res2 = (yyvsp[0].expr);
+        if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
+            res1->value.i_val = res1->value.i_val - res2->value.i_val;
+            free(res2);
+            (yyval.expr) = res1;
+        } 
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_FLOAT) {
+            res1->value.f_val = res1->value.f_val - res2->value.f_val;
+            free(res2);
+            (yyval.expr) = res1;
+        }
+        else if (res1->type == TYPE_INT && res2->type == TYPE_FLOAT) {
+            res1->type = TYPE_FLOAT;
+            res1->value.f_val = (float)res1->value.i_val - res2->value.f_val;
+            free(res2);
+            (yyval.expr) = res1;
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_INT) {
+            res1->value.f_val = res1->value.f_val - (float)res2->value.i_val;
+            free(res2);
+            (yyval.expr) = res1;
+        }
+        else {
+            yyerror("Semanthic error: Uncompatible type for '-'");
+            (yyval.expr) = 0;
+        }
+    }
+#line 1219 "calc.tab.c"
+    break;
+
+  case 12: /* term: atom  */
+#line 125 "calc.y"
+         { (yyval.expr) = (yyvsp[0].expr); }
+#line 1225 "calc.tab.c"
+    break;
+
+  case 13: /* term: term '*' atom  */
+#line 126 "calc.y"
+                    {
+        TempValue *res1 = (yyvsp[-2].expr);
+        TempValue *res2 = (yyvsp[0].expr);
+        if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
+            res1->value.i_val = res1->value.i_val * res2->value.i_val;
+            free(res2);
+            (yyval.expr) = res1;
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_FLOAT) {
+            res1->value.f_val = res1->value.f_val * res2->value.f_val;
+            free(res2);
+            (yyval.expr) = res1;
+        }
+        else if (res1->type == TYPE_INT && res2->type == TYPE_FLOAT) {
+            res1->type = TYPE_FLOAT;
+            res1->value.f_val = (float)res1->value.i_val * res2->value.f_val;
+            free(res2);
+            (yyval.expr) = res1;
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_INT) {
+            res1->value.f_val = res1->value.f_val * (float)res2->value.i_val;
+            free(res2);
+            (yyval.expr) = res1;
+        }
+        else {
+            yyerror("Semanthic error: Uncompatible type for '*'");
+            (yyval.expr) = 0;
+        }
+        
+    }
+#line 1260 "calc.tab.c"
+    break;
+
+  case 14: /* term: term '/' atom  */
+#line 156 "calc.y"
+                    {
+        TempValue *res1 = (yyvsp[-2].expr);
+        TempValue *res2 = (yyvsp[0].expr);
+        if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
+            if (res2->value.i_val == 0) {
+                yyerror("Semanthic error: Division by 0");
+                (yyval.expr) = 0;
+            } else {
+                res1->value.i_val = res1->value.i_val / res2->value.i_val;
+                (yyval.expr) = res1;
+            }
+            free(res2);
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_FLOAT) {
+            if (res2->value.f_val == 0) {
+                yyerror("Semanthic error: Division by 0");
+                (yyval.expr) = 0;
+            } else {
+                res1->value.f_val = res1->value.f_val / res2->value.f_val;
+                (yyval.expr) = res1;
+            }
+            free(res2);
+        }
+        else if (res1->type == TYPE_INT && res2->type == TYPE_FLOAT) {
+            if (res2->value.f_val == 0) {
+                yyerror("Semanthic error: Division by 0");
+                (yyval.expr) = 0;
+            } else {
+                res1->type = TYPE_FLOAT;
+                res1->value.f_val = (float)res1->value.i_val / res2->value.f_val;
+                (yyval.expr) = res1;
+            }
+            free(res2);
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_INT) {
+            if (res2->value.i_val == 0) {
+                yyerror("Semanthic error: Division by 0");
+                (yyval.expr) = 0;
+            } else {
+                res1->value.f_val = res1->value.f_val / (float)res2->value.i_val;
+                (yyval.expr) = res1;
+            }
+            free(res2);
+        }
+        else {
+            yyerror("Semanthic error: Uncompatible type for '/'");
+            (yyval.expr) = 0;
+        }
+        
+    }
+#line 1315 "calc.tab.c"
+    break;
+
+  case 15: /* atom: NUMBER  */
+#line 209 "calc.y"
+           {
+        (yyval.expr) = (TempValue*) malloc(sizeof(TempValue));
+        (yyval.expr)->type = TYPE_INT;
+        (yyval.expr)->value.i_val = (yyvsp[0].ival);
+    }
+#line 1325 "calc.tab.c"
+    break;
+
+  case 16: /* atom: FLOAT_LITERAL  */
+#line 214 "calc.y"
+                    {
+        (yyval.expr) = (TempValue*) malloc(sizeof(TempValue));
+        (yyval.expr)->type = TYPE_FLOAT;
+        (yyval.expr)->value.f_val = (yyvsp[0].fval);
+    }
+#line 1335 "calc.tab.c"
+    break;
+
+  case 17: /* atom: ID  */
+#line 219 "calc.y"
+         {
+        TokenValue *s;
+        (yyval.expr) = (TempValue*) malloc(sizeof(TempValue)); 
+        
+        if (sym_lookup((yyvsp[0].sval), &s) == SYMTAB_NOT_FOUND) {
+            yyerror("Semanthic error: Undeclared variable.");
+            (yyval.expr)->type = TYPE_INT; (yyval.expr)->value.i_val = 0;
+        } else if (!s->inicialized) {
+            yyerror("Semanthic error: Uninicialized variable");
+            (yyval.expr)->type = TYPE_INT; (yyval.expr)->value.i_val = 0;
+        } else {
+            (yyval.expr)->type = s->type;
+            switch (s->type) {
+                case TYPE_INT:
+                    (yyval.expr)->value.i_val = s->value.i_val;
+                    break;
+                case TYPE_FLOAT:
+                    (yyval.expr)->value.f_val = s->value.f_val;
+                    break;
+                case TYPE_STRING:
+                    /* Para strings, duplicamos memoria */
+                    (yyval.expr)->value.s_val = strdup(s->value.s_val);
+                    break;
+                case TYPE_BOOL:
+                    (yyval.expr)->value.b_val = s->value.b_val;
+                    break;
+                default:
+                    break;
+            }
+        }
+        free((yyvsp[0].sval)); 
+    }
+#line 1372 "calc.tab.c"
+    break;
+
+  case 18: /* atom: '(' expression ')'  */
+#line 251 "calc.y"
+                         {
+        (yyval.expr) = (yyvsp[-1].expr); 
+    }
+#line 1380 "calc.tab.c"
+    break;
+
+  case 19: /* declaration: K_INT ID  */
+#line 257 "calc.y"
              {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_INT;
@@ -1127,11 +1393,11 @@ yyreduce:
             printf("BISON: (%s) -> INTEGER.\n", (yyvsp[0].sval));
         }
     }
-#line 1131 "calc.tab.c"
+#line 1397 "calc.tab.c"
     break;
 
-  case 10: /* declaration: K_FLOAT ID  */
-#line 60 "calc.y"
+  case 20: /* declaration: K_FLOAT ID  */
+#line 269 "calc.y"
                  {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_FLOAT;
@@ -1144,11 +1410,11 @@ yyreduce:
             printf("BISON: (%s) -> FLOAT.\n", (yyvsp[0].sval));
         }
     }
-#line 1148 "calc.tab.c"
+#line 1414 "calc.tab.c"
     break;
 
-  case 11: /* declaration: K_STRING ID  */
-#line 72 "calc.y"
+  case 21: /* declaration: K_STRING ID  */
+#line 281 "calc.y"
                   {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_STRING;
@@ -1161,11 +1427,11 @@ yyreduce:
             printf("BISON: (%s) -> STRING.\n", (yyvsp[0].sval));
         }
     }
-#line 1165 "calc.tab.c"
+#line 1431 "calc.tab.c"
     break;
 
-  case 12: /* declaration: K_BOOL ID  */
-#line 84 "calc.y"
+  case 22: /* declaration: K_BOOL ID  */
+#line 293 "calc.y"
                 {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_BOOL;
@@ -1178,11 +1444,11 @@ yyreduce:
             printf("BISON: (%s) -> BOOL.\n", (yyvsp[0].sval));
         }
     }
-#line 1182 "calc.tab.c"
+#line 1448 "calc.tab.c"
     break;
 
-  case 13: /* assignation: ID ASSIGN NUMBER  */
-#line 99 "calc.y"
+  case 23: /* assignation: ID ASSIGN NUMBER  */
+#line 308 "calc.y"
                      {
         TokenValue *s;
         if (sym_lookup((yyvsp[-2].sval), &s) == SYMTAB_NOT_FOUND) {
@@ -1198,11 +1464,11 @@ yyreduce:
             }
         }
     }
-#line 1202 "calc.tab.c"
+#line 1468 "calc.tab.c"
     break;
 
-  case 14: /* assignation: ID ASSIGN FLOAT_LITERAL  */
-#line 114 "calc.y"
+  case 24: /* assignation: ID ASSIGN FLOAT_LITERAL  */
+#line 323 "calc.y"
                               {
         TokenValue *s;
         if (sym_lookup((yyvsp[-2].sval), &s) == SYMTAB_NOT_FOUND) {
@@ -1218,11 +1484,11 @@ yyreduce:
             }
         }
     }
-#line 1222 "calc.tab.c"
+#line 1488 "calc.tab.c"
     break;
 
-  case 15: /* assignation: ID ASSIGN STRING_LITERAL  */
-#line 129 "calc.y"
+  case 25: /* assignation: ID ASSIGN STRING_LITERAL  */
+#line 338 "calc.y"
                                {
         TokenValue *s;
         if (sym_lookup((yyvsp[-2].sval), &s) == SYMTAB_NOT_FOUND) {
@@ -1240,11 +1506,11 @@ yyreduce:
             }
         }
     }
-#line 1244 "calc.tab.c"
+#line 1510 "calc.tab.c"
     break;
 
-  case 16: /* assignation: ID ASSIGN BOOL_LITERAL  */
-#line 146 "calc.y"
+  case 26: /* assignation: ID ASSIGN BOOL_LITERAL  */
+#line 355 "calc.y"
                              {
         TokenValue *s;
         if (sym_lookup((yyvsp[-2].sval), &s) == SYMTAB_NOT_FOUND) {
@@ -1260,11 +1526,11 @@ yyreduce:
             }
         }
     }
-#line 1264 "calc.tab.c"
+#line 1530 "calc.tab.c"
     break;
 
 
-#line 1268 "calc.tab.c"
+#line 1534 "calc.tab.c"
 
       default: break;
     }
@@ -1457,8 +1723,27 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 163 "calc.y"
+#line 372 "calc.y"
 
+
+void print_result(struct TempValue *res) {
+    if (!res) return;
+    switch (res->type) {
+        case TYPE_INT:
+            printf("%d (TYPE_INT)\n", res->value.i_val);
+            break;
+        case TYPE_FLOAT:
+            printf("%f (TYPE_FLOAT)\n", res->value.f_val);
+            break;
+        case TYPE_STRING:
+            printf("%s (TYPE_STRING)\n", res->value.s_val);
+            free(res->value.s_val); /* Liberamos la copia temporal */
+            break;
+        case TYPE_BOOL:
+            printf("%s (TYPE_BOOL)\n", res->value.b_val ? "true" : "false");
+            break;
+    }
+}
 
 void yyerror(const char *s) {
     fprintf(stderr, "LINE %d: Syntax Error - %s\n", yylineno, s);

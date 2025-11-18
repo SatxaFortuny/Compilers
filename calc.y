@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "value.h"
 #include "symtab.h"
 
@@ -8,6 +9,10 @@
 int yylex(void);
 void yyerror(const char *s);
 extern int yylineno;
+
+void print_result(struct TempValue *res);
+
+char *strdup(const char *s);
 %}
 
 %union {
@@ -15,6 +20,7 @@ extern int yylineno;
     float fval;
     char *sval;
     int bval;
+    struct TempValue *expr;
 }
 
 /* Here what we are doing is defining the tokens that will be given by the Flex scanner. */
@@ -28,7 +34,11 @@ extern int yylineno;
 %token <fval> FLOAT_LITERAL 
 %token <sval> STRING_LITERAL 
 %token <ival> BOOL_LITERAL   
-%token ASSIGN              
+%token ASSIGN
+
+%type <expr> expression
+%type <expr> term
+%type <expr> atom
 %%
 
 /* Now we will try to classify everything into a program. Which is defined by a series of lines */
@@ -37,11 +47,210 @@ program:
     ;
 
 line:
-    NUMBER EOL { printf("BISON: NUMBER (%d) + EOL\n", $1); }
+    expression EOL  { 
+        printf("BISON: Result: ");
+        print_result($1); 
+        free($1); 
+    }
     | declaration EOL { printf("BISON: DECLARATION TRACKED.\n"); }
     | assignation EOL { printf("BISON: ASSIGNATION TRACKED.\n"); }
     | EOL        { printf("BISON: EOL\n"); }
     | error EOL  { printf("BISON: Detected error. Jumping to the next line.\n"); yyerrok; }
+    ;
+
+expression:
+    term { $$ = $1; }
+    | expression '+' term {
+        TempValue *res1 = $1;
+        TempValue *res2 = $3;
+        
+        if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
+            res1->value.i_val = res1->value.i_val + res2->value.i_val;
+            free(res2);
+            $$ = res1;
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_FLOAT) {
+            res1->value.f_val = res1->value.f_val + res2->value.f_val;
+            free(res2);
+            $$ = res1;
+        }
+        else if (res1->type == TYPE_INT && res2->type == TYPE_FLOAT) {
+            res1->type = TYPE_FLOAT;
+            res1->value.f_val = (float)res1->value.i_val + res2->value.f_val;
+            free(res2);
+            $$ = res1;
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_INT) {
+            res1->value.f_val = res1->value.f_val + (float)res2->value.i_val;
+            free(res2);
+            $$ = res1;
+        }
+        else {
+            yyerror("Semanthic error: Uncompatible type for '+'");
+            $$ = 0;
+        }
+    }
+    | expression '-' term {
+        TempValue *res1 = $1;
+        TempValue *res2 = $3;
+        if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
+            res1->value.i_val = res1->value.i_val - res2->value.i_val;
+            free(res2);
+            $$ = res1;
+        } 
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_FLOAT) {
+            res1->value.f_val = res1->value.f_val - res2->value.f_val;
+            free(res2);
+            $$ = res1;
+        }
+        else if (res1->type == TYPE_INT && res2->type == TYPE_FLOAT) {
+            res1->type = TYPE_FLOAT;
+            res1->value.f_val = (float)res1->value.i_val - res2->value.f_val;
+            free(res2);
+            $$ = res1;
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_INT) {
+            res1->value.f_val = res1->value.f_val - (float)res2->value.i_val;
+            free(res2);
+            $$ = res1;
+        }
+        else {
+            yyerror("Semanthic error: Uncompatible type for '-'");
+            $$ = 0;
+        }
+    }
+    ;
+
+term:
+    atom { $$ = $1; } 
+    | term '*' atom {
+        TempValue *res1 = $1;
+        TempValue *res2 = $3;
+        if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
+            res1->value.i_val = res1->value.i_val * res2->value.i_val;
+            free(res2);
+            $$ = res1;
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_FLOAT) {
+            res1->value.f_val = res1->value.f_val * res2->value.f_val;
+            free(res2);
+            $$ = res1;
+        }
+        else if (res1->type == TYPE_INT && res2->type == TYPE_FLOAT) {
+            res1->type = TYPE_FLOAT;
+            res1->value.f_val = (float)res1->value.i_val * res2->value.f_val;
+            free(res2);
+            $$ = res1;
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_INT) {
+            res1->value.f_val = res1->value.f_val * (float)res2->value.i_val;
+            free(res2);
+            $$ = res1;
+        }
+        else {
+            yyerror("Semanthic error: Uncompatible type for '*'");
+            $$ = 0;
+        }
+        
+    }
+    | term '/' atom {
+        TempValue *res1 = $1;
+        TempValue *res2 = $3;
+        if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
+            if (res2->value.i_val == 0) {
+                yyerror("Semanthic error: Division by 0");
+                $$ = 0;
+            } else {
+                res1->value.i_val = res1->value.i_val / res2->value.i_val;
+                $$ = res1;
+            }
+            free(res2);
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_FLOAT) {
+            if (res2->value.f_val == 0) {
+                yyerror("Semanthic error: Division by 0");
+                $$ = 0;
+            } else {
+                res1->value.f_val = res1->value.f_val / res2->value.f_val;
+                $$ = res1;
+            }
+            free(res2);
+        }
+        else if (res1->type == TYPE_INT && res2->type == TYPE_FLOAT) {
+            if (res2->value.f_val == 0) {
+                yyerror("Semanthic error: Division by 0");
+                $$ = 0;
+            } else {
+                res1->type = TYPE_FLOAT;
+                res1->value.f_val = (float)res1->value.i_val / res2->value.f_val;
+                $$ = res1;
+            }
+            free(res2);
+        }
+        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_INT) {
+            if (res2->value.i_val == 0) {
+                yyerror("Semanthic error: Division by 0");
+                $$ = 0;
+            } else {
+                res1->value.f_val = res1->value.f_val / (float)res2->value.i_val;
+                $$ = res1;
+            }
+            free(res2);
+        }
+        else {
+            yyerror("Semanthic error: Uncompatible type for '/'");
+            $$ = 0;
+        }
+        
+    }
+    ;
+
+atom:
+    NUMBER {
+        $$ = (TempValue*) malloc(sizeof(TempValue));
+        $$->type = TYPE_INT;
+        $$->value.i_val = $1;
+    }
+    | FLOAT_LITERAL {
+        $$ = (TempValue*) malloc(sizeof(TempValue));
+        $$->type = TYPE_FLOAT;
+        $$->value.f_val = $1;
+    }
+    | ID {
+        TokenValue *s;
+        $$ = (TempValue*) malloc(sizeof(TempValue)); 
+        
+        if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
+            yyerror("Semanthic error: Undeclared variable.");
+            $$->type = TYPE_INT; $$->value.i_val = 0;
+        } else if (!s->inicialized) {
+            yyerror("Semanthic error: Uninicialized variable");
+            $$->type = TYPE_INT; $$->value.i_val = 0;
+        } else {
+            $$->type = s->type;
+            switch (s->type) {
+                case TYPE_INT:
+                    $$->value.i_val = s->value.i_val;
+                    break;
+                case TYPE_FLOAT:
+                    $$->value.f_val = s->value.f_val;
+                    break;
+                case TYPE_STRING:
+                    /* Para strings, duplicamos memoria */
+                    $$->value.s_val = strdup(s->value.s_val);
+                    break;
+                case TYPE_BOOL:
+                    $$->value.b_val = s->value.b_val;
+                    break;
+                default:
+                    break;
+            }
+        }
+        free($1); 
+    }
+    | '(' expression ')' {
+        $$ = $2; 
+    }
     ;
 
 declaration:
@@ -161,6 +370,25 @@ assignation:
     ;
 
 %%
+
+void print_result(struct TempValue *res) {
+    if (!res) return;
+    switch (res->type) {
+        case TYPE_INT:
+            printf("%d (TYPE_INT)\n", res->value.i_val);
+            break;
+        case TYPE_FLOAT:
+            printf("%f (TYPE_FLOAT)\n", res->value.f_val);
+            break;
+        case TYPE_STRING:
+            printf("%s (TYPE_STRING)\n", res->value.s_val);
+            free(res->value.s_val); /* Liberamos la copia temporal */
+            break;
+        case TYPE_BOOL:
+            printf("%s (TYPE_BOOL)\n", res->value.b_val ? "true" : "false");
+            break;
+    }
+}
 
 void yyerror(const char *s) {
     fprintf(stderr, "LINE %d: Syntax Error - %s\n", yylineno, s);

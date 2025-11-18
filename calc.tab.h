@@ -73,14 +73,15 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 13 "calc.y"
+#line 18 "calc.y"
 
     int ival;
     float fval;
     char *sval;
     int bval;
+    struct TempValue *expr;
 
-#line 84 "calc.tab.h"
+#line 85 "calc.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
