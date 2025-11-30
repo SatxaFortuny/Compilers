@@ -65,7 +65,22 @@ extern int yydebug;
     STRING_LITERAL = 266,          /* STRING_LITERAL  */
     BOOL_LITERAL = 267,            /* BOOL_LITERAL  */
     ASSIGN = 268,                  /* ASSIGN  */
-    POWER = 269                    /* POWER  */
+    POWER = 269,                   /* POWER  */
+    EQ = 270,                      /* EQ  */
+    LE = 271,                      /* LE  */
+    GE = 272,                      /* GE  */
+    NE = 273,                      /* NE  */
+    LT = 274,                      /* LT  */
+    GT = 275,                      /* GT  */
+    AND = 276,                     /* AND  */
+    OR = 277,                      /* OR  */
+    NOT = 278,                     /* NOT  */
+    PI = 279,                      /* PI  */
+    E = 280,                       /* E  */
+    SIN = 281,                     /* SIN  */
+    COS = 282,                     /* COS  */
+    TAN = 283,                     /* TAN  */
+    LEN = 284                      /* LEN  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -74,7 +89,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 19 "calc.y"
+#line 21 "calc.y"
 
     int ival;
     float fval;
@@ -82,7 +97,7 @@ union YYSTYPE
     int bval;
     struct TempValue *expr;
 
-#line 86 "calc.tab.h"
+#line 101 "calc.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -85,7 +85,9 @@ void print_result(struct TempValue *res);
 
 char *strdup(const char *s);
 
-#line 89 "calc.tab.c"
+struct TempValue* compare(struct TempValue* v1, struct TempValue* v2, int op);
+
+#line 91 "calc.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -128,23 +130,42 @@ enum yysymbol_kind_t
   YYSYMBOL_BOOL_LITERAL = 12,              /* BOOL_LITERAL  */
   YYSYMBOL_ASSIGN = 13,                    /* ASSIGN  */
   YYSYMBOL_POWER = 14,                     /* POWER  */
-  YYSYMBOL_15_ = 15,                       /* '+'  */
-  YYSYMBOL_16_ = 16,                       /* '-'  */
-  YYSYMBOL_17_ = 17,                       /* '*'  */
-  YYSYMBOL_18_ = 18,                       /* '/'  */
-  YYSYMBOL_19_ = 19,                       /* '%'  */
-  YYSYMBOL_20_ = 20,                       /* '('  */
-  YYSYMBOL_21_ = 21,                       /* ')'  */
-  YYSYMBOL_YYACCEPT = 22,                  /* $accept  */
-  YYSYMBOL_program = 23,                   /* program  */
-  YYSYMBOL_line = 24,                      /* line  */
-  YYSYMBOL_expression = 25,                /* expression  */
-  YYSYMBOL_term = 26,                      /* term  */
-  YYSYMBOL_unary = 27,                     /* unary  */
-  YYSYMBOL_pow = 28,                       /* pow  */
-  YYSYMBOL_atom = 29,                      /* atom  */
-  YYSYMBOL_declaration = 30,               /* declaration  */
-  YYSYMBOL_assignation = 31                /* assignation  */
+  YYSYMBOL_EQ = 15,                        /* EQ  */
+  YYSYMBOL_LE = 16,                        /* LE  */
+  YYSYMBOL_GE = 17,                        /* GE  */
+  YYSYMBOL_NE = 18,                        /* NE  */
+  YYSYMBOL_LT = 19,                        /* LT  */
+  YYSYMBOL_GT = 20,                        /* GT  */
+  YYSYMBOL_AND = 21,                       /* AND  */
+  YYSYMBOL_OR = 22,                        /* OR  */
+  YYSYMBOL_NOT = 23,                       /* NOT  */
+  YYSYMBOL_PI = 24,                        /* PI  */
+  YYSYMBOL_E = 25,                         /* E  */
+  YYSYMBOL_SIN = 26,                       /* SIN  */
+  YYSYMBOL_COS = 27,                       /* COS  */
+  YYSYMBOL_TAN = 28,                       /* TAN  */
+  YYSYMBOL_LEN = 29,                       /* LEN  */
+  YYSYMBOL_30_ = 30,                       /* '+'  */
+  YYSYMBOL_31_ = 31,                       /* '-'  */
+  YYSYMBOL_32_ = 32,                       /* '*'  */
+  YYSYMBOL_33_ = 33,                       /* '/'  */
+  YYSYMBOL_34_ = 34,                       /* '%'  */
+  YYSYMBOL_35_ = 35,                       /* '('  */
+  YYSYMBOL_36_ = 36,                       /* ')'  */
+  YYSYMBOL_YYACCEPT = 37,                  /* $accept  */
+  YYSYMBOL_program = 38,                   /* program  */
+  YYSYMBOL_line = 39,                      /* line  */
+  YYSYMBOL_or_predicate = 40,              /* or_predicate  */
+  YYSYMBOL_and_predicate = 41,             /* and_predicate  */
+  YYSYMBOL_not_predicate = 42,             /* not_predicate  */
+  YYSYMBOL_predicate = 43,                 /* predicate  */
+  YYSYMBOL_expression = 44,                /* expression  */
+  YYSYMBOL_term = 45,                      /* term  */
+  YYSYMBOL_unary = 46,                     /* unary  */
+  YYSYMBOL_pow = 47,                       /* pow  */
+  YYSYMBOL_atom = 48,                      /* atom  */
+  YYSYMBOL_declaration = 49,               /* declaration  */
+  YYSYMBOL_assignation = 50                /* assignation  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -472,19 +493,19 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   53
+#define YYLAST   138
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  22
+#define YYNTOKENS  37
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  10
+#define YYNNTS  14
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  32
+#define YYNRULES  50
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  53
+#define YYNSTATES  92
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   269
+#define YYMAXUTOK   284
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -501,8 +522,8 @@ static const yytype_int8 yytranslate[] =
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,    19,     2,     2,
-      20,    21,    17,    15,     2,    16,     2,    18,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,    34,     2,     2,
+      35,    36,    32,    30,     2,    31,     2,    33,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -524,17 +545,21 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14
+       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
+      25,    26,    27,    28,    29
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    49,    49,    50,    54,    59,    60,    61,    62,    66,
-      67,    97,   129,   130,   160,   209,   229,   230,   241,   245,
-     246,   263,   268,   273,   305,   311,   323,   335,   347,   362,
-     377,   392,   409
+       0,    58,    58,    59,    63,    68,    69,    70,    71,    75,
+      76,    85,    86,    95,    96,   108,   109,   110,   111,   112,
+     113,   114,   118,   119,   149,   181,   182,   212,   261,   281,
+     282,   293,   297,   298,   315,   320,   325,   330,   336,   368,
+     373,   378,   391,   404,   417,   431,   437,   449,   461,   473,
+     488
 };
 #endif
 
@@ -552,9 +577,12 @@ static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "NUMBER", "ID",
   "K_INT", "K_FLOAT", "K_STRING", "K_BOOL", "EOL", "FLOAT_LITERAL",
-  "STRING_LITERAL", "BOOL_LITERAL", "ASSIGN", "POWER", "'+'", "'-'", "'*'",
-  "'/'", "'%'", "'('", "')'", "$accept", "program", "line", "expression",
-  "term", "unary", "pow", "atom", "declaration", "assignation", YY_NULLPTR
+  "STRING_LITERAL", "BOOL_LITERAL", "ASSIGN", "POWER", "EQ", "LE", "GE",
+  "NE", "LT", "GT", "AND", "OR", "NOT", "PI", "E", "SIN", "COS", "TAN",
+  "LEN", "'+'", "'-'", "'*'", "'/'", "'%'", "'('", "')'", "$accept",
+  "program", "line", "or_predicate", "and_predicate", "not_predicate",
+  "predicate", "expression", "term", "unary", "pow", "atom", "declaration",
+  "assignation", YY_NULLPTR
 };
 
 static const char *
@@ -564,7 +592,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-20)
+#define YYPACT_NINF (-22)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -578,12 +606,16 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-     -20,     2,   -20,    -5,   -20,    10,    26,    30,    37,    40,
-     -20,   -20,    17,    17,    17,   -20,    27,    29,   -20,    35,
-     -20,    41,    42,   -20,    28,   -20,   -20,   -20,   -20,   -20,
-     -20,   -20,    -2,   -20,    17,    17,    17,    17,    17,    25,
-     -20,   -20,   -20,   -20,   -20,   -20,   -20,    29,    29,   -20,
-     -20,   -20,   -20
+     -22,     2,   -22,    60,   -22,    69,    40,    81,    82,    83,
+     -22,   -22,   -22,   -22,    35,   -22,   -22,    38,    63,    65,
+      66,    64,    64,    35,   -22,    31,    62,   -22,   -22,     4,
+     -17,   -22,    88,   -22,    97,    98,   -22,    35,   -22,   -22,
+     -22,   -22,   -22,   -22,    64,    64,    64,    64,   -22,   -22,
+     -18,   -22,    35,    64,    64,    64,    64,    64,    64,    64,
+      64,    64,    64,    64,    64,    93,   -22,   -22,    86,    18,
+      21,    41,    48,   -22,    62,   -22,    25,    25,    25,    25,
+      25,    25,   -17,   -17,   -22,   -22,   -22,   -22,   -22,   -22,
+     -22,   -22
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -591,24 +623,30 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       2,     0,     1,     0,    21,    23,     0,     0,     0,     0,
-       7,    22,     0,     0,     0,     3,     0,     9,    12,    16,
-      19,     0,     0,     8,     0,    25,    26,    27,    28,    23,
-      18,    17,     0,     4,     0,     0,     0,     0,     0,     0,
-       5,     6,    29,    30,    31,    32,    24,    10,    11,    13,
-      14,    15,    20
+       2,     0,     1,     0,    34,    38,     0,     0,     0,     0,
+       7,    35,    37,    36,     0,    39,    40,     0,     0,     0,
+       0,     0,     0,     0,     3,     0,     9,    11,    13,    15,
+      22,    25,    29,    32,     0,     0,     8,     0,    46,    47,
+      48,    49,    38,    14,     0,     0,     0,     0,    31,    30,
+       0,     4,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     5,     6,    50,     0,
+       0,     0,     0,    45,    10,    12,    16,    19,    21,    17,
+      18,    20,    23,    24,    26,    27,    28,    33,    41,    42,
+      43,    44
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -20,   -20,   -20,    38,   -19,   -12,   -20,    14,   -20,   -20
+     -22,   -22,   -22,    13,    57,    96,    58,    79,    20,   -21,
+     -22,    47,   -22,   -22
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     1,    15,    16,    17,    18,    19,    20,    21,    22
+       0,     1,    24,    25,    26,    27,    28,    29,    30,    31,
+      32,    33,    34,    35
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -616,52 +654,76 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      30,    31,     2,     3,    23,     4,     5,     6,     7,     8,
-       9,    10,    11,    34,    35,    47,    48,    12,    13,    46,
-       4,    29,    14,    24,    49,    50,    51,    11,     4,    29,
-      25,    42,    12,    13,    26,    11,    33,    14,    43,    44,
-      45,    27,    34,    35,    28,    14,    36,    37,    38,    39,
-      40,    41,    32,    52
+      48,    49,     2,     3,    52,     4,     5,     6,     7,     8,
+       9,    10,    11,    12,    13,    62,    63,    64,    73,    54,
+      55,    56,    57,    58,    59,    14,    15,    16,    17,    18,
+      19,    20,    21,    22,    60,    61,    50,    23,     4,    42,
+      51,    84,    85,    86,    38,    11,    12,    13,    60,    61,
+      68,    60,    61,    52,    88,    60,    61,    89,    14,    15,
+      16,    17,    18,    19,    20,    21,    22,     4,    42,    36,
+      23,    60,    61,    44,    11,    12,    13,    90,    60,    61,
+      82,    83,    37,    53,    91,    39,    40,    41,    15,    16,
+      17,    18,    19,    20,    21,    22,     4,    42,    45,    23,
+      46,    47,    65,    11,    12,    13,    66,    67,    52,    74,
+      43,    75,    87,     0,     0,     0,     0,    15,    16,    17,
+      18,    19,    20,    69,    70,    71,    72,     0,    23,     0,
+       0,     0,     0,    76,    77,    78,    79,    80,    81
 };
 
 static const yytype_int8 yycheck[] =
 {
-      12,    13,     0,     1,     9,     3,     4,     5,     6,     7,
-       8,     9,    10,    15,    16,    34,    35,    15,    16,    21,
-       3,     4,    20,    13,    36,    37,    38,    10,     3,     4,
-       4,     3,    15,    16,     4,    10,     9,    20,    10,    11,
-      12,     4,    15,    16,     4,    20,    17,    18,    19,    14,
-       9,     9,    14,    39
+      21,    22,     0,     1,    22,     3,     4,     5,     6,     7,
+       8,     9,    10,    11,    12,    32,    33,    34,    36,    15,
+      16,    17,    18,    19,    20,    23,    24,    25,    26,    27,
+      28,    29,    30,    31,    30,    31,    23,    35,     3,     4,
+       9,    62,    63,    64,     4,    10,    11,    12,    30,    31,
+      37,    30,    31,    22,    36,    30,    31,    36,    23,    24,
+      25,    26,    27,    28,    29,    30,    31,     3,     4,     9,
+      35,    30,    31,    35,    10,    11,    12,    36,    30,    31,
+      60,    61,    13,    21,    36,     4,     4,     4,    24,    25,
+      26,    27,    28,    29,    30,    31,     3,     4,    35,    35,
+      35,    35,    14,    10,    11,    12,     9,     9,    22,    52,
+      14,    53,    65,    -1,    -1,    -1,    -1,    24,    25,    26,
+      27,    28,    29,    44,    45,    46,    47,    -1,    35,    -1,
+      -1,    -1,    -1,    54,    55,    56,    57,    58,    59
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,    23,     0,     1,     3,     4,     5,     6,     7,     8,
-       9,    10,    15,    16,    20,    24,    25,    26,    27,    28,
-      29,    30,    31,     9,    13,     4,     4,     4,     4,     4,
-      27,    27,    25,     9,    15,    16,    17,    18,    19,    14,
-       9,     9,     3,    10,    11,    12,    21,    26,    26,    27,
-      27,    27,    29
+       0,    38,     0,     1,     3,     4,     5,     6,     7,     8,
+       9,    10,    11,    12,    23,    24,    25,    26,    27,    28,
+      29,    30,    31,    35,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    48,    49,    50,     9,    13,     4,     4,
+       4,     4,     4,    42,    35,    35,    35,    35,    46,    46,
+      40,     9,    22,    21,    15,    16,    17,    18,    19,    20,
+      30,    31,    32,    33,    34,    14,     9,     9,    40,    44,
+      44,    44,    44,    36,    41,    43,    44,    44,    44,    44,
+      44,    44,    45,    45,    46,    46,    46,    48,    36,    36,
+      36,    36
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    22,    23,    23,    24,    24,    24,    24,    24,    25,
-      25,    25,    26,    26,    26,    26,    27,    27,    27,    28,
-      28,    29,    29,    29,    29,    30,    30,    30,    30,    31,
-      31,    31,    31
+       0,    37,    38,    38,    39,    39,    39,    39,    39,    40,
+      40,    41,    41,    42,    42,    43,    43,    43,    43,    43,
+      43,    43,    44,    44,    44,    45,    45,    45,    45,    46,
+      46,    46,    47,    47,    48,    48,    48,    48,    48,    48,
+      48,    48,    48,    48,    48,    48,    49,    49,    49,    49,
+      50
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     0,     2,     2,     2,     2,     1,     2,     1,
-       3,     3,     1,     3,     3,     3,     1,     2,     2,     1,
-       3,     1,     1,     1,     3,     2,     2,     2,     2,     3,
-       3,     3,     3
+       3,     1,     3,     1,     2,     1,     3,     3,     3,     3,
+       3,     3,     1,     3,     3,     1,     3,     3,     3,     1,
+       2,     2,     1,     3,     1,     1,     1,     1,     1,     1,
+       1,     4,     4,     4,     4,     3,     2,     2,     2,     2,
+       3
 };
 
 
@@ -1124,48 +1186,144 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 4: /* line: expression EOL  */
-#line 54 "calc.y"
-                    { 
+  case 4: /* line: or_predicate EOL  */
+#line 63 "calc.y"
+                     {
         printf("BISON: Result: ");
         print_result((yyvsp[-1].expr)); 
-        free((yyvsp[-1].expr)); 
+        free((yyvsp[-1].expr));
     }
-#line 1135 "calc.tab.c"
+#line 1197 "calc.tab.c"
     break;
 
   case 5: /* line: declaration EOL  */
-#line 59 "calc.y"
+#line 68 "calc.y"
                       { printf("BISON: DECLARATION TRACKED.\n"); }
-#line 1141 "calc.tab.c"
+#line 1203 "calc.tab.c"
     break;
 
   case 6: /* line: assignation EOL  */
-#line 60 "calc.y"
+#line 69 "calc.y"
                       { printf("BISON: ASSIGNATION TRACKED.\n"); }
-#line 1147 "calc.tab.c"
+#line 1209 "calc.tab.c"
     break;
 
   case 7: /* line: EOL  */
-#line 61 "calc.y"
+#line 70 "calc.y"
                  { printf("BISON: EOL\n"); }
-#line 1153 "calc.tab.c"
+#line 1215 "calc.tab.c"
     break;
 
   case 8: /* line: error EOL  */
-#line 62 "calc.y"
+#line 71 "calc.y"
                  { printf("BISON: Detected error. Jumping to the next line.\n"); yyerrok; }
-#line 1159 "calc.tab.c"
+#line 1221 "calc.tab.c"
     break;
 
-  case 9: /* expression: term  */
-#line 66 "calc.y"
+  case 9: /* or_predicate: and_predicate  */
+#line 75 "calc.y"
+                  { (yyval.expr) = (yyvsp[0].expr); }
+#line 1227 "calc.tab.c"
+    break;
+
+  case 10: /* or_predicate: or_predicate OR and_predicate  */
+#line 76 "calc.y"
+                                    {
+        struct TempValue *res = (yyvsp[-2].expr);
+        res->value.b_val = ((yyvsp[-2].expr)->value.b_val || (yyvsp[0].expr)->value.b_val);
+        free((yyvsp[0].expr));
+        (yyval.expr) = res;
+    }
+#line 1238 "calc.tab.c"
+    break;
+
+  case 11: /* and_predicate: not_predicate  */
+#line 85 "calc.y"
+                  { (yyval.expr) = (yyvsp[0].expr); }
+#line 1244 "calc.tab.c"
+    break;
+
+  case 12: /* and_predicate: and_predicate AND predicate  */
+#line 86 "calc.y"
+                                  {
+        struct TempValue *res = (yyvsp[-2].expr);
+        res->value.b_val = ((yyvsp[-2].expr)->value.b_val && (yyvsp[0].expr)->value.b_val);
+        free((yyvsp[0].expr));
+        (yyval.expr) = res;
+    }
+#line 1255 "calc.tab.c"
+    break;
+
+  case 13: /* not_predicate: predicate  */
+#line 95 "calc.y"
+              { (yyval.expr) = (yyvsp[0].expr); }
+#line 1261 "calc.tab.c"
+    break;
+
+  case 14: /* not_predicate: NOT not_predicate  */
+#line 96 "calc.y"
+                        {
+        struct TempValue *res = (yyvsp[0].expr);
+        if (res->type != TYPE_BOOL) {
+            yyerror("Semantic Error: NOT requires boolean operand");
+        } else {
+            res->value.b_val = !res->value.b_val;
+        }
+        (yyval.expr) = res;
+    }
+#line 1275 "calc.tab.c"
+    break;
+
+  case 15: /* predicate: expression  */
+#line 108 "calc.y"
+               { (yyval.expr) = (yyvsp[0].expr); }
+#line 1281 "calc.tab.c"
+    break;
+
+  case 16: /* predicate: expression EQ expression  */
+#line 109 "calc.y"
+                               { (yyval.expr) = compare((yyvsp[-2].expr), (yyvsp[0].expr), EQ); }
+#line 1287 "calc.tab.c"
+    break;
+
+  case 17: /* predicate: expression NE expression  */
+#line 110 "calc.y"
+                               { (yyval.expr) = compare((yyvsp[-2].expr), (yyvsp[0].expr), NE); }
+#line 1293 "calc.tab.c"
+    break;
+
+  case 18: /* predicate: expression LT expression  */
+#line 111 "calc.y"
+                               { (yyval.expr) = compare((yyvsp[-2].expr), (yyvsp[0].expr), LT); }
+#line 1299 "calc.tab.c"
+    break;
+
+  case 19: /* predicate: expression LE expression  */
+#line 112 "calc.y"
+                               { (yyval.expr) = compare((yyvsp[-2].expr), (yyvsp[0].expr), LE); }
+#line 1305 "calc.tab.c"
+    break;
+
+  case 20: /* predicate: expression GT expression  */
+#line 113 "calc.y"
+                               { (yyval.expr) = compare((yyvsp[-2].expr), (yyvsp[0].expr), GT); }
+#line 1311 "calc.tab.c"
+    break;
+
+  case 21: /* predicate: expression GE expression  */
+#line 114 "calc.y"
+                               { (yyval.expr) = compare((yyvsp[-2].expr), (yyvsp[0].expr), GE); }
+#line 1317 "calc.tab.c"
+    break;
+
+  case 22: /* expression: term  */
+#line 118 "calc.y"
          { (yyval.expr) = (yyvsp[0].expr); }
-#line 1165 "calc.tab.c"
+#line 1323 "calc.tab.c"
     break;
 
-  case 10: /* expression: expression '+' term  */
-#line 67 "calc.y"
+  case 23: /* expression: expression '+' term  */
+#line 119 "calc.y"
                           {
         TempValue *res1 = (yyvsp[-2].expr);
         TempValue *res2 = (yyvsp[0].expr);
@@ -1196,11 +1354,11 @@ yyreduce:
             (yyval.expr) = 0;
         }
     }
-#line 1200 "calc.tab.c"
+#line 1358 "calc.tab.c"
     break;
 
-  case 11: /* expression: expression '-' term  */
-#line 97 "calc.y"
+  case 24: /* expression: expression '-' term  */
+#line 149 "calc.y"
                           {
         TempValue *res1 = (yyvsp[-2].expr);
         TempValue *res2 = (yyvsp[0].expr);
@@ -1230,17 +1388,17 @@ yyreduce:
             (yyval.expr) = 0;
         }
     }
-#line 1234 "calc.tab.c"
+#line 1392 "calc.tab.c"
     break;
 
-  case 12: /* term: unary  */
-#line 129 "calc.y"
+  case 25: /* term: unary  */
+#line 181 "calc.y"
           { (yyval.expr) = (yyvsp[0].expr); }
-#line 1240 "calc.tab.c"
+#line 1398 "calc.tab.c"
     break;
 
-  case 13: /* term: term '*' unary  */
-#line 130 "calc.y"
+  case 26: /* term: term '*' unary  */
+#line 182 "calc.y"
                      {
         TempValue *res1 = (yyvsp[-2].expr);
         TempValue *res2 = (yyvsp[0].expr);
@@ -1271,11 +1429,11 @@ yyreduce:
         }
         
     }
-#line 1275 "calc.tab.c"
+#line 1433 "calc.tab.c"
     break;
 
-  case 14: /* term: term '/' unary  */
-#line 160 "calc.y"
+  case 27: /* term: term '/' unary  */
+#line 212 "calc.y"
                      {
         TempValue *res1 = (yyvsp[-2].expr);
         TempValue *res2 = (yyvsp[0].expr);
@@ -1325,11 +1483,11 @@ yyreduce:
             (yyval.expr) = 0;
         }   
     }
-#line 1329 "calc.tab.c"
+#line 1487 "calc.tab.c"
     break;
 
-  case 15: /* term: term '%' unary  */
-#line 209 "calc.y"
+  case 28: /* term: term '%' unary  */
+#line 261 "calc.y"
                      {
         TempValue *res1 = (yyvsp[-2].expr);
         TempValue *res2 = (yyvsp[0].expr);
@@ -1347,17 +1505,17 @@ yyreduce:
             (yyval.expr) = 0;
         }
     }
-#line 1351 "calc.tab.c"
+#line 1509 "calc.tab.c"
     break;
 
-  case 16: /* unary: pow  */
-#line 229 "calc.y"
+  case 29: /* unary: pow  */
+#line 281 "calc.y"
         { (yyval.expr) = (yyvsp[0].expr); }
-#line 1357 "calc.tab.c"
+#line 1515 "calc.tab.c"
     break;
 
-  case 17: /* unary: '-' unary  */
-#line 230 "calc.y"
+  case 30: /* unary: '-' unary  */
+#line 282 "calc.y"
                 {
         TempValue *res = (yyvsp[0].expr);
         if (res->type == TYPE_INT) {
@@ -1369,23 +1527,23 @@ yyreduce:
         }
         (yyval.expr) = res;
     }
-#line 1373 "calc.tab.c"
+#line 1531 "calc.tab.c"
     break;
 
-  case 18: /* unary: '+' unary  */
-#line 241 "calc.y"
+  case 31: /* unary: '+' unary  */
+#line 293 "calc.y"
                 { (yyval.expr) = (yyvsp[0].expr); }
-#line 1379 "calc.tab.c"
+#line 1537 "calc.tab.c"
     break;
 
-  case 19: /* pow: atom  */
-#line 245 "calc.y"
+  case 32: /* pow: atom  */
+#line 297 "calc.y"
          { (yyval.expr) = (yyvsp[0].expr); }
-#line 1385 "calc.tab.c"
+#line 1543 "calc.tab.c"
     break;
 
-  case 20: /* pow: pow POWER atom  */
-#line 246 "calc.y"
+  case 33: /* pow: pow POWER atom  */
+#line 298 "calc.y"
                      { 
         TempValue *res1 = (yyvsp[-2].expr);
         TempValue *res2 = (yyvsp[0].expr);
@@ -1400,31 +1558,52 @@ yyreduce:
         free(res2);
         (yyval.expr) = res1;
     }
-#line 1404 "calc.tab.c"
+#line 1562 "calc.tab.c"
     break;
 
-  case 21: /* atom: NUMBER  */
-#line 263 "calc.y"
+  case 34: /* atom: NUMBER  */
+#line 315 "calc.y"
            {
         (yyval.expr) = (TempValue*) malloc(sizeof(TempValue));
         (yyval.expr)->type = TYPE_INT;
         (yyval.expr)->value.i_val = (yyvsp[0].ival);
     }
-#line 1414 "calc.tab.c"
+#line 1572 "calc.tab.c"
     break;
 
-  case 22: /* atom: FLOAT_LITERAL  */
-#line 268 "calc.y"
+  case 35: /* atom: FLOAT_LITERAL  */
+#line 320 "calc.y"
                     {
         (yyval.expr) = (TempValue*) malloc(sizeof(TempValue));
         (yyval.expr)->type = TYPE_FLOAT;
         (yyval.expr)->value.f_val = (yyvsp[0].fval);
     }
-#line 1424 "calc.tab.c"
+#line 1582 "calc.tab.c"
     break;
 
-  case 23: /* atom: ID  */
-#line 273 "calc.y"
+  case 36: /* atom: BOOL_LITERAL  */
+#line 325 "calc.y"
+                   {
+        (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
+        (yyval.expr)->type = TYPE_BOOL;
+        (yyval.expr)->value.b_val = (yyvsp[0].ival);
+    }
+#line 1592 "calc.tab.c"
+    break;
+
+  case 37: /* atom: STRING_LITERAL  */
+#line 330 "calc.y"
+                     {
+        (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
+        (yyval.expr)->type = TYPE_STRING;
+        /* Flex ya hizo el strdup, así que nos lo quedamos */
+        (yyval.expr)->value.s_val = (yyvsp[0].sval); 
+    }
+#line 1603 "calc.tab.c"
+    break;
+
+  case 38: /* atom: ID  */
+#line 336 "calc.y"
          {
         TokenValue *s;
         (yyval.expr) = (TempValue*) malloc(sizeof(TempValue)); 
@@ -1457,19 +1636,112 @@ yyreduce:
         }
         free((yyvsp[0].sval)); 
     }
-#line 1461 "calc.tab.c"
+#line 1640 "calc.tab.c"
     break;
 
-  case 24: /* atom: '(' expression ')'  */
-#line 305 "calc.y"
-                         {
+  case 39: /* atom: PI  */
+#line 368 "calc.y"
+         {
+        (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
+        (yyval.expr)->type = TYPE_FLOAT;
+        (yyval.expr)->value.f_val = 3.14159265358979323846;
+    }
+#line 1650 "calc.tab.c"
+    break;
+
+  case 40: /* atom: E  */
+#line 373 "calc.y"
+        {
+        (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
+        (yyval.expr)->type = TYPE_FLOAT;
+        (yyval.expr)->value.f_val = 2.71828182845904523536;
+    }
+#line 1660 "calc.tab.c"
+    break;
+
+  case 41: /* atom: SIN '(' expression ')'  */
+#line 378 "calc.y"
+                             {
+        struct TempValue *arg = (yyvsp[-1].expr);
+        float val = 0.0;
+        if (arg->type == TYPE_INT) val = (float)arg->value.i_val;
+        else if (arg->type == TYPE_FLOAT) val = arg->value.f_val;
+        else {
+            yyerror("Semantic Error: sin() requires a number");
+        }
+        
+        arg->type = TYPE_FLOAT;
+        arg->value.f_val = sin(val);
+        (yyval.expr) = arg; 
+    }
+#line 1678 "calc.tab.c"
+    break;
+
+  case 42: /* atom: COS '(' expression ')'  */
+#line 391 "calc.y"
+                             {
+        struct TempValue *arg = (yyvsp[-1].expr);
+        float val = 0.0;
+        if (arg->type == TYPE_INT) val = (float)arg->value.i_val;
+        else if (arg->type == TYPE_FLOAT) val = arg->value.f_val;
+        else {
+            yyerror("Semantic Error: cos() requires a number");
+        }
+        
+        arg->type = TYPE_FLOAT;
+        arg->value.f_val = cos(val); 
+        (yyval.expr) = arg; 
+    }
+#line 1696 "calc.tab.c"
+    break;
+
+  case 43: /* atom: TAN '(' expression ')'  */
+#line 404 "calc.y"
+                             {
+        struct TempValue *arg = (yyvsp[-1].expr);
+        float val = 0.0;
+        if (arg->type == TYPE_INT) val = (float)arg->value.i_val;
+        else if (arg->type == TYPE_FLOAT) val = arg->value.f_val;
+        else {
+            yyerror("Semantic Error: tan() requires a number");
+        }
+        
+        arg->type = TYPE_FLOAT;
+        arg->value.f_val = tan(val);
+        (yyval.expr) = arg; 
+    }
+#line 1714 "calc.tab.c"
+    break;
+
+  case 44: /* atom: LEN '(' expression ')'  */
+#line 417 "calc.y"
+                             {
+        struct TempValue *arg = (yyvsp[-1].expr);
+        if (arg->type != TYPE_STRING) {
+            yyerror("Semantic Error: LEN() requires a string");
+            arg->type = TYPE_INT; 
+            arg->value.i_val = 0;
+        } else {
+            int len = strlen(arg->value.s_val);
+            free(arg->value.s_val); 
+            arg->type = TYPE_INT;
+            arg->value.i_val = len;
+        }
+        (yyval.expr) = arg;
+    }
+#line 1733 "calc.tab.c"
+    break;
+
+  case 45: /* atom: '(' or_predicate ')'  */
+#line 431 "calc.y"
+                           {
         (yyval.expr) = (yyvsp[-1].expr); 
     }
-#line 1469 "calc.tab.c"
+#line 1741 "calc.tab.c"
     break;
 
-  case 25: /* declaration: K_INT ID  */
-#line 311 "calc.y"
+  case 46: /* declaration: K_INT ID  */
+#line 437 "calc.y"
              {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_INT;
@@ -1482,11 +1754,11 @@ yyreduce:
             printf("BISON: (%s) -> INTEGER.\n", (yyvsp[0].sval));
         }
     }
-#line 1486 "calc.tab.c"
+#line 1758 "calc.tab.c"
     break;
 
-  case 26: /* declaration: K_FLOAT ID  */
-#line 323 "calc.y"
+  case 47: /* declaration: K_FLOAT ID  */
+#line 449 "calc.y"
                  {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_FLOAT;
@@ -1499,11 +1771,11 @@ yyreduce:
             printf("BISON: (%s) -> FLOAT.\n", (yyvsp[0].sval));
         }
     }
-#line 1503 "calc.tab.c"
+#line 1775 "calc.tab.c"
     break;
 
-  case 27: /* declaration: K_STRING ID  */
-#line 335 "calc.y"
+  case 48: /* declaration: K_STRING ID  */
+#line 461 "calc.y"
                   {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_STRING;
@@ -1516,11 +1788,11 @@ yyreduce:
             printf("BISON: (%s) -> STRING.\n", (yyvsp[0].sval));
         }
     }
-#line 1520 "calc.tab.c"
+#line 1792 "calc.tab.c"
     break;
 
-  case 28: /* declaration: K_BOOL ID  */
-#line 347 "calc.y"
+  case 49: /* declaration: K_BOOL ID  */
+#line 473 "calc.y"
                 {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_BOOL;
@@ -1533,93 +1805,54 @@ yyreduce:
             printf("BISON: (%s) -> BOOL.\n", (yyvsp[0].sval));
         }
     }
-#line 1537 "calc.tab.c"
+#line 1809 "calc.tab.c"
     break;
 
-  case 29: /* assignation: ID ASSIGN NUMBER  */
-#line 362 "calc.y"
-                     {
+  case 50: /* assignation: ID ASSIGN or_predicate  */
+#line 488 "calc.y"
+                           { 
         TokenValue *s;
+        struct TempValue *res = (yyvsp[0].expr); 
+
         if (sym_lookup((yyvsp[-2].sval), &s) == SYMTAB_NOT_FOUND) {
             yyerror("SEMANTIC ERROR: Variable not found");
-            free((yyvsp[-2].sval));
         } else {
-            if (s->type != TYPE_INT) {
-                yyerror("SEMANTIC ERROR: Uncompatible assignation");
+            if (s->type != res->type) {
+                yyerror("SEMANTIC ERROR: Incompatible types in assignment");
+                printf("Error detail: Variable is type %d, Value is type %d\n", s->type, res->type);
             } else {
-                s->value.i_val = (yyvsp[0].ival);
+                switch (s->type) {
+                    case TYPE_INT:
+                        s->value.i_val = res->value.i_val;
+                        break;
+                    case TYPE_FLOAT:
+                        s->value.f_val = res->value.f_val;
+                        break;
+                    case TYPE_BOOL:
+                        s->value.b_val = res->value.b_val;
+                        break;
+                    case TYPE_STRING:
+                        if (s->inicialized && s->value.s_val) {
+                            free(s->value.s_val);
+                        }
+                        s->value.s_val = strdup(res->value.s_val);
+                        break;
+                }
                 s->inicialized = true;
-                printf("BISON: Assigned %s := %d\n", (yyvsp[-2].sval), (yyvsp[0].ival));
+                printf("BISON: Assigned variable '%s'\n", (yyvsp[-2].sval));
             }
         }
-    }
-#line 1557 "calc.tab.c"
-    break;
-
-  case 30: /* assignation: ID ASSIGN FLOAT_LITERAL  */
-#line 377 "calc.y"
-                              {
-        TokenValue *s;
-        if (sym_lookup((yyvsp[-2].sval), &s) == SYMTAB_NOT_FOUND) {
-            yyerror("SEMANTIC ERROR: Variable not found");
-            free((yyvsp[-2].sval));
-        } else {
-            if (s->type != TYPE_FLOAT) {
-                yyerror("SEMANTIC ERROR: Uncompatible assignation");
-            } else {
-                s->value.f_val = (yyvsp[0].fval);
-                s->inicialized = true;
-                printf("BISON: Assigned %s := %f\n", (yyvsp[-2].sval), (yyvsp[0].fval));
-            }
+        free((yyvsp[-2].sval));
+        if (res->type == TYPE_STRING) {
+            free(res->value.s_val);
         }
+        free(res);
     }
-#line 1577 "calc.tab.c"
-    break;
-
-  case 31: /* assignation: ID ASSIGN STRING_LITERAL  */
-#line 392 "calc.y"
-                               {
-        TokenValue *s;
-        if (sym_lookup((yyvsp[-2].sval), &s) == SYMTAB_NOT_FOUND) {
-            yyerror("SEMANTIC ERROR: Variable not found");
-            free((yyvsp[-2].sval));
-            free((yyvsp[0].sval));
-        } else {
-            if (s->type != TYPE_STRING) {
-                yyerror("SEMANTIC ERROR: Uncompatible assignation");
-            } else {
-                if (s->inicialized && s->value.s_val) free(s->value.s_val);
-                s->value.s_val = (yyvsp[0].sval); 
-                s->inicialized = true;
-                printf("BISON: Assigned %s := \"%s\"\n", (yyvsp[-2].sval), (yyvsp[0].sval));
-            }
-        }
-    }
-#line 1599 "calc.tab.c"
-    break;
-
-  case 32: /* assignation: ID ASSIGN BOOL_LITERAL  */
-#line 409 "calc.y"
-                             {
-        TokenValue *s;
-        if (sym_lookup((yyvsp[-2].sval), &s) == SYMTAB_NOT_FOUND) {
-            yyerror("SEMANTIC ERROR: Variable not found");
-            free((yyvsp[-2].sval));
-        } else {
-            if (s->type != TYPE_BOOL) {
-                yyerror("SEMANTIC ERROR: Uncompatible assignation");
-            } else {
-                s->value.b_val = (yyvsp[0].ival); 
-                s->inicialized = true;
-                printf("BISON: Assigned %s := %s\n", (yyvsp[-2].sval), (yyvsp[0].ival) ? "true" : "false");
-            }
-        }
-    }
-#line 1619 "calc.tab.c"
+#line 1852 "calc.tab.c"
     break;
 
 
-#line 1623 "calc.tab.c"
+#line 1856 "calc.tab.c"
 
       default: break;
     }
@@ -1812,7 +2045,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 426 "calc.y"
+#line 528 "calc.y"
 
 
 void print_result(struct TempValue *res) {
@@ -1836,6 +2069,48 @@ void print_result(struct TempValue *res) {
 
 void yyerror(const char *s) {
     fprintf(stderr, "LINE %d: Syntax Error - %s\n", yylineno, s);
+}
+
+struct TempValue* compare(struct TempValue* v1, struct TempValue* v2, int op) {
+    struct TempValue* res = (struct TempValue*) malloc(sizeof(struct TempValue));
+    res->type = TYPE_BOOL;
+    
+    /* 1. Obtenir els valors com a float per poder comparar INT amb FLOAT */
+    float val1 = 0.0, val2 = 0.0;
+    
+    /* Extreure valor 1 */
+    if (v1->type == TYPE_INT) val1 = (float)v1->value.i_val;
+    else if (v1->type == TYPE_FLOAT) val1 = v1->value.f_val;
+    else {
+        /* Opcional: Gestionar error si intentes comparar strings o bools amb < > */
+        /* Per simplicitat assumim 0 si no és número */
+    }
+
+    /* Extreure valor 2 */
+    if (v2->type == TYPE_INT) val2 = (float)v2->value.i_val;
+    else if (v2->type == TYPE_FLOAT) val2 = v2->value.f_val;
+    else {
+        /* Idem */
+    }
+
+    /* 2. Calcular el resultat */
+    int r = 0;
+    switch(op) {
+        case EQ: r = (val1 == val2); break;
+        case NE: r = (val1 != val2); break; /* Has definit el token com NE */
+        case LT: r = (val1 < val2); break;
+        case LE: r = (val1 <= val2); break;
+        case GT: r = (val1 > val2); break;
+        case GE: r = (val1 >= val2); break;
+    }
+
+    res->value.b_val = r;
+    
+    /* 3. Neteja de memòria: Els operands v1 i v2 ja no es necessiten */
+    free(v1); 
+    free(v2);
+    
+    return res;
 }
 
 int main(int argc, char **argv) {

@@ -15,7 +15,7 @@ void print_result(struct TempValue *res);
 
 char *strdup(const char *s);
 
-struct TempValue* compare(struct TempValue* v1, struct TempValue* v2, int op)
+struct TempValue* compare(struct TempValue* v1, struct TempValue* v2, int op);
 %}
 
 %union {
@@ -39,14 +39,19 @@ struct TempValue* compare(struct TempValue* v1, struct TempValue* v2, int op)
 %token <ival> BOOL_LITERAL   
 %token ASSIGN
 %token POWER
-%token EQ LE GE NE LT GT AND OR NOT POWER
+%token EQ LE GE NE LT GT AND OR NOT
+%token PI E SIN COS TAN LEN
 
+%type <expr> or_predicate
+%type <expr> and_predicate
+%type <expr> not_predicate
+%type <expr> predicate
 %type <expr> expression
 %type <expr> term
 %type <expr> atom
 %type <expr> unary
 %type <expr> pow
-%type <expr> predicate
+
 %%
 
 /* Now we will try to classify everything into a program. Which is defined by a series of lines */
@@ -77,11 +82,24 @@ or_predicate:
     ;
 
 and_predicate:
-    predicate { $$ = $1; }
+    not_predicate { $$ = $1; }
     | and_predicate AND predicate {
         struct TempValue *res = $1;
         res->value.b_val = ($1->value.b_val && $3->value.b_val);
         free($3);
+        $$ = res;
+    }
+    ;
+
+not_predicate:
+    predicate { $$ = $1; }
+    | NOT not_predicate {
+        struct TempValue *res = $2;
+        if (res->type != TYPE_BOOL) {
+            yyerror("Semantic Error: NOT requires boolean operand");
+        } else {
+            res->value.b_val = !res->value.b_val;
+        }
         $$ = res;
     }
     ;
@@ -304,6 +322,17 @@ atom:
         $$->type = TYPE_FLOAT;
         $$->value.f_val = $1;
     }
+    | BOOL_LITERAL {
+        $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
+        $$->type = TYPE_BOOL;
+        $$->value.b_val = $1;
+    }
+    | STRING_LITERAL {
+        $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
+        $$->type = TYPE_STRING;
+        /* Flex ya hizo el strdup, así que nos lo quedamos */
+        $$->value.s_val = $1; 
+    }
     | ID {
         TokenValue *s;
         $$ = (TempValue*) malloc(sizeof(TempValue)); 
@@ -336,7 +365,70 @@ atom:
         }
         free($1); 
     }
-    | '(' expression ')' {
+    | PI {
+        $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
+        $$->type = TYPE_FLOAT;
+        $$->value.f_val = 3.14159265358979323846;
+    }
+    | E {
+        $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
+        $$->type = TYPE_FLOAT;
+        $$->value.f_val = 2.71828182845904523536;
+    }
+    | SIN '(' expression ')' {
+        struct TempValue *arg = $3;
+        float val = 0.0;
+        if (arg->type == TYPE_INT) val = (float)arg->value.i_val;
+        else if (arg->type == TYPE_FLOAT) val = arg->value.f_val;
+        else {
+            yyerror("Semantic Error: sin() requires a number");
+        }
+        
+        arg->type = TYPE_FLOAT;
+        arg->value.f_val = sin(val);
+        $$ = arg; 
+    }
+    | COS '(' expression ')' {
+        struct TempValue *arg = $3;
+        float val = 0.0;
+        if (arg->type == TYPE_INT) val = (float)arg->value.i_val;
+        else if (arg->type == TYPE_FLOAT) val = arg->value.f_val;
+        else {
+            yyerror("Semantic Error: cos() requires a number");
+        }
+        
+        arg->type = TYPE_FLOAT;
+        arg->value.f_val = cos(val); 
+        $$ = arg; 
+    }
+    | TAN '(' expression ')' {
+        struct TempValue *arg = $3;
+        float val = 0.0;
+        if (arg->type == TYPE_INT) val = (float)arg->value.i_val;
+        else if (arg->type == TYPE_FLOAT) val = arg->value.f_val;
+        else {
+            yyerror("Semantic Error: tan() requires a number");
+        }
+        
+        arg->type = TYPE_FLOAT;
+        arg->value.f_val = tan(val);
+        $$ = arg; 
+    }
+    | LEN '(' expression ')' {
+        struct TempValue *arg = $3;
+        if (arg->type != TYPE_STRING) {
+            yyerror("Semantic Error: LEN() requires a string");
+            arg->type = TYPE_INT; 
+            arg->value.i_val = 0;
+        } else {
+            int len = strlen(arg->value.s_val);
+            free(arg->value.s_val); 
+            arg->type = TYPE_INT;
+            arg->value.i_val = len;
+        }
+        $$ = arg;
+    }
+    | '(' or_predicate ')' {
         $$ = $2; 
     }
     ;
@@ -393,7 +485,7 @@ declaration:
 ;
 
 assignation:
-    ID ASSIGN expression { 
+    ID ASSIGN or_predicate { 
         TokenValue *s;
         struct TempValue *res = $3; 
 

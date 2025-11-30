@@ -7,8 +7,24 @@
 /* This option makes Flex keep an account of the number of lines (which increments each time it reads \n.)
 This way we keep track of where the error is if there happens to be one*/
 %option yylineno
-
+%x COMMENT
 %%
+
+"/*"            { BEGIN(COMMENT); }
+
+<COMMENT>"*/"   { BEGIN(INITIAL); } 
+<COMMENT>\n     {  }
+<COMMENT>.      {  }
+
+"and"        { return AND; }
+"or"         { return OR; }
+"not"        { return NOT; }
+"PI"         { return PI; }
+"E"          { return E; }
+"sin"        { return SIN; }
+"cos"        { return COS; }
+"tan"        { return TAN; }
+"LEN"        { return LEN; }
 
 "int"       {   printf("(%d)TRACKED: Integer\n", yylineno);
                 return K_INT; }
@@ -54,9 +70,7 @@ This way we keep track of where the error is if there happens to be one*/
 "!="         { return NE; }
 "<"          { return LT; }
 ">"          { return GT; }
-"and"        { return AND; }
-"or"         { return OR; }
-"not"        { return NOT; }
+
 "**"         { return POWER; }
 "%"          { return '%'; }
 "+"          { return '+'; }
