@@ -64,7 +64,8 @@ extern int yydebug;
     FLOAT_LITERAL = 265,           /* FLOAT_LITERAL  */
     STRING_LITERAL = 266,          /* STRING_LITERAL  */
     BOOL_LITERAL = 267,            /* BOOL_LITERAL  */
-    ASSIGN = 268                   /* ASSIGN  */
+    ASSIGN = 268,                  /* ASSIGN  */
+    POWER = 269                    /* POWER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -73,7 +74,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 18 "calc.y"
+#line 19 "calc.y"
 
     int ival;
     float fval;
@@ -81,7 +82,7 @@ union YYSTYPE
     int bval;
     struct TempValue *expr;
 
-#line 85 "calc.tab.h"
+#line 86 "calc.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

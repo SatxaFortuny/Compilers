@@ -48,6 +48,17 @@ This way we keep track of where the error is if there happens to be one*/
     printf("(%d) TRACKED: ID (%s)\n", yylineno, yylval.sval);
     return ID;
 }
+"=="         { return EQ; }
+"<="         { return LE; }
+">="         { return GE; }
+"!="         { return NE; }
+"<"          { return LT; }
+">"          { return GT; }
+"and"        { return AND; }
+"or"         { return OR; }
+"not"        { return NOT; }
+"**"         { return POWER; }
+"%"          { return '%'; }
 "+"          { return '+'; }
 "-"          { return '-'; }
 "*"          { return '*'; }

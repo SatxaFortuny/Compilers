@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "value.h"
 #include "symtab.h"
 
@@ -13,6 +14,8 @@ extern int yylineno;
 void print_result(struct TempValue *res);
 
 char *strdup(const char *s);
+
+struct TempValue* compare(struct TempValue* v1, struct TempValue* v2, int op)
 %}
 
 %union {
@@ -35,10 +38,15 @@ char *strdup(const char *s);
 %token <sval> STRING_LITERAL 
 %token <ival> BOOL_LITERAL   
 %token ASSIGN
+%token POWER
+%token EQ LE GE NE LT GT AND OR NOT POWER
 
 %type <expr> expression
 %type <expr> term
 %type <expr> atom
+%type <expr> unary
+%type <expr> pow
+%type <expr> predicate
 %%
 
 /* Now we will try to classify everything into a program. Which is defined by a series of lines */
@@ -47,15 +55,45 @@ program:
     ;
 
 line:
-    expression EOL  { 
+    or_predicate EOL {
         printf("BISON: Result: ");
         print_result($1); 
-        free($1); 
+        free($1);
     }
     | declaration EOL { printf("BISON: DECLARATION TRACKED.\n"); }
     | assignation EOL { printf("BISON: ASSIGNATION TRACKED.\n"); }
     | EOL        { printf("BISON: EOL\n"); }
     | error EOL  { printf("BISON: Detected error. Jumping to the next line.\n"); yyerrok; }
+    ;
+
+or_predicate:
+    and_predicate { $$ = $1; }
+    | or_predicate OR and_predicate {
+        struct TempValue *res = $1;
+        res->value.b_val = ($1->value.b_val || $3->value.b_val);
+        free($3);
+        $$ = res;
+    }
+    ;
+
+and_predicate:
+    predicate { $$ = $1; }
+    | and_predicate AND predicate {
+        struct TempValue *res = $1;
+        res->value.b_val = ($1->value.b_val && $3->value.b_val);
+        free($3);
+        $$ = res;
+    }
+    ;
+
+predicate:
+    expression { $$ = $1; }
+    | expression EQ expression { $$ = compare($1, $3, EQ); }
+    | expression NE expression { $$ = compare($1, $3, NE); }
+    | expression LT expression { $$ = compare($1, $3, LT); }
+    | expression LE expression { $$ = compare($1, $3, LE); }
+    | expression GT expression { $$ = compare($1, $3, GT); }
+    | expression GE expression { $$ = compare($1, $3, GE); }
     ;
 
 expression:
@@ -122,8 +160,8 @@ expression:
     ;
 
 term:
-    atom { $$ = $1; } 
-    | term '*' atom {
+    unary { $$ = $1; } 
+    | term '*' unary {
         TempValue *res1 = $1;
         TempValue *res2 = $3;
         if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
@@ -153,7 +191,7 @@ term:
         }
         
     }
-    | term '/' atom {
+    | term '/' unary {
         TempValue *res1 = $1;
         TempValue *res2 = $3;
         if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
@@ -200,8 +238,58 @@ term:
         else {
             yyerror("Semanthic error: Uncompatible type for '/'");
             $$ = 0;
+        }   
+    }
+    | term '%' unary {
+        TempValue *res1 = $1;
+        TempValue *res2 = $3;
+        if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
+            if (res2->value.i_val == 0) {
+                 yyerror("Semantic error: Mod by 0");
+                 $$ = 0;
+            } else {
+                 res1->value.i_val = res1->value.i_val % res2->value.i_val;
+                 $$ = res1;
+            }
+            free(res2);
+        } else {
+            yyerror("Semantic error: Mod requires INTEGER types");
+            $$ = 0;
         }
-        
+    }
+    ;
+
+unary:
+    pow { $$ = $1; }
+    | '-' unary {
+        TempValue *res = $2;
+        if (res->type == TYPE_INT) {
+            res->value.i_val = -res->value.i_val;
+        } else if (res->type == TYPE_FLOAT) {
+            res->value.f_val = -res->value.f_val;
+        } else {
+            yyerror("Semantic error: Invalid type for minus");
+        }
+        $$ = res;
+    }
+    | '+' unary { $$ = $2; } 
+    ;
+
+pow:
+    atom { $$ = $1; }
+    | pow POWER atom { 
+        TempValue *res1 = $1;
+        TempValue *res2 = $3;
+        if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
+            res1->value.i_val = (int)pow((double)res1->value.i_val, (double)res2->value.i_val);
+        } else {
+            float val1 = (res1->type == TYPE_INT) ? (float)res1->value.i_val : res1->value.f_val;
+            float val2 = (res2->type == TYPE_INT) ? (float)res2->value.i_val : res2->value.f_val;            
+            res1->type = TYPE_FLOAT;
+            res1->value.f_val = (float)pow((double)val1, (double)val2);
+        }
+        free(res2);
+        $$ = res1;
     }
     ;
 
@@ -305,67 +393,43 @@ declaration:
 ;
 
 assignation:
-    ID ASSIGN NUMBER {
+    ID ASSIGN expression { 
         TokenValue *s;
+        struct TempValue *res = $3; 
+
         if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
             yyerror("SEMANTIC ERROR: Variable not found");
-            free($1);
         } else {
-            if (s->type != TYPE_INT) {
-                yyerror("SEMANTIC ERROR: Uncompatible assignation");
+            if (s->type != res->type) {
+                yyerror("SEMANTIC ERROR: Incompatible types in assignment");
+                printf("Error detail: Variable is type %d, Value is type %d\n", s->type, res->type);
             } else {
-                s->value.i_val = $3;
+                switch (s->type) {
+                    case TYPE_INT:
+                        s->value.i_val = res->value.i_val;
+                        break;
+                    case TYPE_FLOAT:
+                        s->value.f_val = res->value.f_val;
+                        break;
+                    case TYPE_BOOL:
+                        s->value.b_val = res->value.b_val;
+                        break;
+                    case TYPE_STRING:
+                        if (s->inicialized && s->value.s_val) {
+                            free(s->value.s_val);
+                        }
+                        s->value.s_val = strdup(res->value.s_val);
+                        break;
+                }
                 s->inicialized = true;
-                printf("BISON: Assigned %s := %d\n", $1, $3);
+                printf("BISON: Assigned variable '%s'\n", $1);
             }
         }
-    }
-    | ID ASSIGN FLOAT_LITERAL {
-        TokenValue *s;
-        if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
-            yyerror("SEMANTIC ERROR: Variable not found");
-            free($1);
-        } else {
-            if (s->type != TYPE_FLOAT) {
-                yyerror("SEMANTIC ERROR: Uncompatible assignation");
-            } else {
-                s->value.f_val = $3;
-                s->inicialized = true;
-                printf("BISON: Assigned %s := %f\n", $1, $3);
-            }
+        free($1);
+        if (res->type == TYPE_STRING) {
+            free(res->value.s_val);
         }
-    }
-    | ID ASSIGN STRING_LITERAL {
-        TokenValue *s;
-        if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
-            yyerror("SEMANTIC ERROR: Variable not found");
-            free($1);
-            free($3);
-        } else {
-            if (s->type != TYPE_STRING) {
-                yyerror("SEMANTIC ERROR: Uncompatible assignation");
-            } else {
-                if (s->inicialized && s->value.s_val) free(s->value.s_val);
-                s->value.s_val = $3; 
-                s->inicialized = true;
-                printf("BISON: Assigned %s := \"%s\"\n", $1, $3);
-            }
-        }
-    }
-    | ID ASSIGN BOOL_LITERAL {
-        TokenValue *s;
-        if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
-            yyerror("SEMANTIC ERROR: Variable not found");
-            free($1);
-        } else {
-            if (s->type != TYPE_BOOL) {
-                yyerror("SEMANTIC ERROR: Uncompatible assignation");
-            } else {
-                s->value.b_val = $3; 
-                s->inicialized = true;
-                printf("BISON: Assigned %s := %s\n", $1, $3 ? "true" : "false");
-            }
-        }
+        free(res);
     }
     ;
 
@@ -392,6 +456,48 @@ void print_result(struct TempValue *res) {
 
 void yyerror(const char *s) {
     fprintf(stderr, "LINE %d: Syntax Error - %s\n", yylineno, s);
+}
+
+struct TempValue* compare(struct TempValue* v1, struct TempValue* v2, int op) {
+    struct TempValue* res = (struct TempValue*) malloc(sizeof(struct TempValue));
+    res->type = TYPE_BOOL;
+    
+    /* 1. Obtenir els valors com a float per poder comparar INT amb FLOAT */
+    float val1 = 0.0, val2 = 0.0;
+    
+    /* Extreure valor 1 */
+    if (v1->type == TYPE_INT) val1 = (float)v1->value.i_val;
+    else if (v1->type == TYPE_FLOAT) val1 = v1->value.f_val;
+    else {
+        /* Opcional: Gestionar error si intentes comparar strings o bools amb < > */
+        /* Per simplicitat assumim 0 si no és número */
+    }
+
+    /* Extreure valor 2 */
+    if (v2->type == TYPE_INT) val2 = (float)v2->value.i_val;
+    else if (v2->type == TYPE_FLOAT) val2 = v2->value.f_val;
+    else {
+        /* Idem */
+    }
+
+    /* 2. Calcular el resultat */
+    int r = 0;
+    switch(op) {
+        case EQ: r = (val1 == val2); break;
+        case NE: r = (val1 != val2); break; /* Has definit el token com NE */
+        case LT: r = (val1 < val2); break;
+        case LE: r = (val1 <= val2); break;
+        case GT: r = (val1 > val2); break;
+        case GE: r = (val1 >= val2); break;
+    }
+
+    res->value.b_val = r;
+    
+    /* 3. Neteja de memòria: Els operands v1 i v2 ja no es necessiten */
+    free(v1); 
+    free(v2);
+    
+    return res;
 }
 
 int main(int argc, char **argv) {
