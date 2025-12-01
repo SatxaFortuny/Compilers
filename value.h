@@ -11,6 +11,19 @@ typedef enum {
     TYPE_STRUCT
 } TypeData;
 
+typedef struct Token {
+    char *name;            
+    TypeData type;         
+    union {
+        int   i_val;
+        float f_val;
+        char *s_val;
+        int   b_val;
+    } value;
+    
+    struct Token *next;    
+} Token;
+
 typedef struct TokenValue {
     TypeData type;
     bool inicialized;
@@ -19,6 +32,7 @@ typedef struct TokenValue {
         float f_val;
         char *s_val;
         bool   b_val;
+        struct Token *tokens;
     } value;
 } TokenValue;
 
@@ -29,6 +43,7 @@ typedef struct TempValue {
         float f_val;
         char *s_val;
         bool  b_val;
+        struct Token *tokens;
     } value;
 } TempValue;
 #endif

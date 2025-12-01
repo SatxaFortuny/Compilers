@@ -56,10 +56,10 @@ extern int yydebug;
     YYUNDEF = 257,                 /* "invalid token"  */
     NUMBER = 258,                  /* NUMBER  */
     ID = 259,                      /* ID  */
-    K_INT = 260,                   /* K_INT  */
-    K_FLOAT = 261,                 /* K_FLOAT  */
-    K_STRING = 262,                /* K_STRING  */
-    K_BOOL = 263,                  /* K_BOOL  */
+    INT = 260,                     /* INT  */
+    FLOAT = 261,                   /* FLOAT  */
+    STRING = 262,                  /* STRING  */
+    BOOL = 263,                    /* BOOL  */
     EOL = 264,                     /* EOL  */
     FLOAT_LITERAL = 265,           /* FLOAT_LITERAL  */
     STRING_LITERAL = 266,          /* STRING_LITERAL  */
@@ -80,7 +80,8 @@ extern int yydebug;
     SIN = 281,                     /* SIN  */
     COS = 282,                     /* COS  */
     TAN = 283,                     /* TAN  */
-    LEN = 284                      /* LEN  */
+    LEN = 284,                     /* LEN  */
+    STRUCT = 285                   /* STRUCT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -89,15 +90,16 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 21 "calc.y"
+#line 27 "calc.y"
 
     int ival;
     float fval;
     char *sval;
     int bval;
     struct TempValue *expr;
+    struct Token *tokens;
 
-#line 101 "calc.tab.h"
+#line 103 "calc.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

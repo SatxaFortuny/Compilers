@@ -11,11 +11,17 @@ int yylex(void);
 void yyerror(const char *s);
 extern int yylineno;
 
+extern FILE *yyin;
+
 void print_result(struct TempValue *res);
 
 char *strdup(const char *s);
 
 struct TempValue* compare(struct TempValue* v1, struct TempValue* v2, int op);
+
+struct Token* find_field(struct Token* list, char* name);
+
+struct Token* copy_tokens(struct Token* source);
 %}
 
 %union {
@@ -24,15 +30,16 @@ struct TempValue* compare(struct TempValue* v1, struct TempValue* v2, int op);
     char *sval;
     int bval;
     struct TempValue *expr;
+    struct Token *tokens;
 }
 
 /* Here what we are doing is defining the tokens that will be given by the Flex scanner. */
 %token <ival> NUMBER
 %token <sval> ID
-%token K_INT
-%token K_FLOAT
-%token K_STRING
-%token K_BOOL
+%token INT
+%token FLOAT
+%token STRING
+%token BOOL
 %token EOL 
 %token <fval> FLOAT_LITERAL 
 %token <sval> STRING_LITERAL 
@@ -41,6 +48,7 @@ struct TempValue* compare(struct TempValue* v1, struct TempValue* v2, int op);
 %token POWER
 %token EQ LE GE NE LT GT AND OR NOT
 %token PI E SIN COS TAN LEN
+%token STRUCT
 
 %type <expr> or_predicate
 %type <expr> and_predicate
@@ -51,6 +59,9 @@ struct TempValue* compare(struct TempValue* v1, struct TempValue* v2, int op);
 %type <expr> atom
 %type <expr> unary
 %type <expr> pow
+
+%type <tokens> token_list token_decl
+%type <tokens> id_list
 
 %%
 
@@ -112,6 +123,65 @@ predicate:
     | expression LE expression { $$ = compare($1, $3, LE); }
     | expression GT expression { $$ = compare($1, $3, GT); }
     | expression GE expression { $$ = compare($1, $3, GE); }
+    ;
+
+token_list:
+    token_decl { 
+        $$ = $1;
+    }
+    | token_decl token_list {
+        $1->next = $2; 
+        $$ = $1; 
+    }
+    ;
+
+id_list:
+    ID {
+        /* Creamos un nodo solo para guardar el nombre */
+        struct Token *t = (struct Token*) malloc(sizeof(struct Token));
+        t->name = $1; 
+        t->next = NULL;
+        $$ = t;
+    }
+    | id_list ',' ID {
+        /* Añadimos el nuevo ID al final o principio de la lista */
+        struct Token *t = (struct Token*) malloc(sizeof(struct Token));
+        t->name = $3;
+        t->next = $1; /* Lo ponemos al principio para ir rápido (orden inverso, no importa) */
+        $$ = t;
+    }
+    ;
+
+/* Regla para crear un solo campo (int x;) */
+token_decl:
+    INT ID ';' {
+        struct Token *t = (struct Token*) malloc(sizeof(struct Token));
+        t->name = $2;      /* Guardamos el nombre "x" */
+        t->type = TYPE_INT;
+        t->next = NULL;
+        $$ = t;            /* Subimos el puntero */
+    }
+    | FLOAT ID ';' {
+        struct Token *t = (struct Token*) malloc(sizeof(struct Token));
+        t->name = $2;
+        t->type = TYPE_FLOAT;
+        t->next = NULL;
+        $$ = t;
+    }
+    | STRING ID ';' {
+        struct Token *t = (struct Token*) malloc(sizeof(struct Token));
+        t->name = $2;
+        t->type = TYPE_STRING;
+        t->next = NULL;
+        $$ = t;
+    }
+    | BOOL ID ';' {
+        struct Token *t = (struct Token*) malloc(sizeof(struct Token));
+        t->name = $2;
+        t->type = TYPE_BOOL;
+        t->next = NULL;
+        $$ = t;
+    }
     ;
 
 expression:
@@ -428,13 +498,47 @@ atom:
         }
         $$ = arg;
     }
+    /* Acceso a miembro: ID . ID */
+    | ID '.' ID {
+        TokenValue *s;
+        $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
+
+        /* 1. Buscamos la variable principal (el struct) */
+        if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
+            yyerror("Semantic Error: Struct variable not found");
+            $$->type = TYPE_INT; $$->value.i_val = 0;
+        } else if (s->type != TYPE_STRUCT) {
+            yyerror("Semantic Error: Variable is not a struct");
+            $$->type = TYPE_INT; $$->value.i_val = 0;
+        } else {
+            /* 2. Buscamos el campo dentro de su lista */
+            struct Token *field = find_field(s->value.tokens, $3);
+            
+            if (field == NULL) {
+                yyerror("Semantic Error: Field not found in struct");
+                $$->type = TYPE_INT; $$->value.i_val = 0;
+            } else {
+                /* 3. ¡Éxito! Copiamos tipo y valor al resultado temporal */
+                $$->type = field->type;
+                
+                switch(field->type) {
+                    case TYPE_INT: $$->value.i_val = field->value.i_val; break;
+                    case TYPE_FLOAT: $$->value.f_val = field->value.f_val; break;
+                    case TYPE_BOOL: $$->value.b_val = field->value.b_val; break;
+                    case TYPE_STRING: $$->value.s_val = strdup(field->value.s_val); break;
+                    default: break;
+                }
+            }
+        }
+        free($1); free($3); /* Limpieza de los nombres */
+    }
     | '(' or_predicate ')' {
         $$ = $2; 
     }
     ;
 
 declaration:
-    K_INT ID {
+    INT ID {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_INT;
         val->inicialized=false;
@@ -446,7 +550,7 @@ declaration:
             printf("BISON: (%s) -> INTEGER.\n", $2);
         }
     }
-    | K_FLOAT ID {
+    | FLOAT ID {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_FLOAT;
         val->inicialized=false;
@@ -458,7 +562,7 @@ declaration:
             printf("BISON: (%s) -> FLOAT.\n", $2);
         }
     }
-    | K_STRING ID {
+    | STRING ID {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_STRING;
         val->inicialized=false;
@@ -470,7 +574,7 @@ declaration:
             printf("BISON: (%s) -> STRING.\n", $2);
         }
     }
-    | K_BOOL ID {
+    | BOOL ID {
         TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
         val->type = TYPE_BOOL;
         val->inicialized=false;
@@ -481,6 +585,46 @@ declaration:
         } else {
             printf("BISON: (%s) -> BOOL.\n", $2);
         }
+    }
+    /* Regla MODIFICADA para soportar múltiples variables */
+    | STRUCT ID '{' token_list '}' id_list {
+        /* $2: Nombre del tipo (ej: "Punto") */
+        /* $4: Plantilla de campos (x, y) */
+        /* $6: Lista de variables (p1, p2) */
+        
+        printf("BISON: Defining struct type '%s'\n", $2);
+        
+        /* Recorremos la lista de variables (p1, p2...) */
+        struct Token *current_var = $6;
+        while (current_var != NULL) {
+            
+            /* 1. Crear la variable en memoria */
+            TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
+            val->type = TYPE_STRUCT;
+            val->inicialized = true;
+            
+            /* 2. ¡IMPORTANTE! Darle su propia COPIA de los campos */
+            val->value.tokens = copy_tokens($4); 
+            
+            /* 3. Registrar en la Tabla de Símbolos */
+            if (sym_add(current_var->name, &val) == SYMTAB_DUPLICATE) {
+                yyerror("SEMANTIC ERROR: Duplicate variable in struct declaration");
+                free(val); /* (Deberíamos liberar también la lista copiada) */
+                free(current_var->name);
+            } else {
+                printf("BISON: Struct instance '%s' created.\n", current_var->name);
+            }
+            
+            /* Avanzar al siguiente ID (p2...) y limpiar el nodo auxiliar */
+            struct Token *temp = current_var;
+            current_var = current_var->next;
+            free(temp); /* Liberamos el nodo de la lista de IDs */
+        }
+        
+        /* Limpieza final */
+        free($2); /* Nombre del tipo */
+        /* Deberíamos liberar la plantilla original $4, ya que hemos hecho copias */
+        /* (Te dejo esa limpieza como opcional para no complicar más) */
     }
 ;
 
@@ -522,6 +666,45 @@ assignation:
             free(res->value.s_val);
         }
         free(res);
+    }
+    /* Asignación a miembro: ID . ID := valor */
+    | ID '.' ID ASSIGN or_predicate {
+        TokenValue *s;
+        struct TempValue *res = $5; /* El valor calculado (derecha) */
+
+        /* 1. Buscar Struct */
+        if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
+            yyerror("Error: Struct variable not found");
+        } else if (s->type != TYPE_STRUCT) {
+            yyerror("Error: Variable is not a struct");
+        } else {
+            /* 2. Buscar Campo */
+            struct Token *field = find_field(s->value.tokens, $3);
+            
+            if (field == NULL) {
+                yyerror("Error: Field not found in struct");
+            } else {
+                /* 3. Chequear compatibilidad de tipos */
+                if (field->type != res->type) {
+                    yyerror("Error: Type mismatch in field assignment");
+                } else {
+                    /* 4. Asignar el valor directamente al campo */
+                    switch(field->type) {
+                        case TYPE_INT:   field->value.i_val = res->value.i_val; break;
+                        case TYPE_FLOAT: field->value.f_val = res->value.f_val; break;
+                        case TYPE_BOOL:  field->value.b_val = res->value.b_val; break;
+                        case TYPE_STRING: 
+                            /* (Aquí podrías hacer free si ya tenía valor, pero simplificamos) */
+                            field->value.s_val = strdup(res->value.s_val); 
+                            break;
+                        default: break;
+                    }
+                    printf("BISON: Assigned field %s.%s\n", $1, $3);
+                }
+            }
+        }
+        free($1); free($3); 
+        /* free(res); (Depende de si necesitas liberar el TempValue aquí o lo hace Bison) */
     }
     ;
 
@@ -592,10 +775,80 @@ struct TempValue* compare(struct TempValue* v1, struct TempValue* v2, int op) {
     return res;
 }
 
-int main(int argc, char **argv) {
-    printf("--- Starting Parser (Bison + Flex) ---\n");
-    yyparse();
+struct Token* find_field(struct Token* list, char* name) {
+    struct Token *current = list;
+    while (current != NULL) {
+        /* strcmp devuelve 0 si son iguales */
+        if (strcmp(current->name, name) == 0) {
+            return current; /* ¡Encontrado! */
+        }
+        current = current->next;
+    }
+    return NULL; /* No existe ese campo */
+}
+
+/* Copia profunda de la lista de campos para que cada variable tenga la suya propia */
+struct Token* copy_tokens(struct Token* source) {
+    if (source == NULL) return NULL;
     
-    printf("--- End of Parser ---\n");
+    struct Token *new_node = (struct Token*) malloc(sizeof(struct Token));
+    /* Copiamos los datos básicos */
+    new_node->name = strdup(source->name);
+    new_node->type = source->type;
+    new_node->value = source->value; /* Copia la unión (inicializada a 0/NULL) */
+    
+    /* Recursión para copiar el resto de la lista */
+    new_node->next = copy_tokens(source->next);
+    
+    return new_node;
+}
+
+/* ... (Tus includes y definiciones de arriba siguen igual) ... */
+
+/* Añade esto justo debajo de los includes en la sección %{ ... %} o antes del main */
+extern FILE *yyin; /* Variable global de Flex para el archivo de entrada */
+
+/* ... (Todo tu código de gramática sigue igual) ... */
+
+/* ... (Tus funciones auxiliares print_result, yyerror, etc. siguen igual) ... */
+
+int main(int argc, char **argv) {
+    
+    /* 1. Comprobamos que nos pasen 2 argumentos (entrada y salida) */
+    if (argc != 3) {
+        fprintf(stderr, "Uso correcto: %s <fichero_entrada> <fichero_salida>\n", argv[0]);
+        return 1;
+    }
+
+    /* 2. Abrimos el archivo de ENTRADA en modo lectura ("r") */
+    FILE *input = fopen(argv[1], "r");
+    if (!input) {
+        fprintf(stderr, "Error: No se pudo abrir el archivo de entrada '%s'\n", argv[1]);
+        return 1;
+    }
+
+    /* 3. Le decimos a Flex que lea de este archivo en vez de la consola */
+    yyin = input;
+
+    /* 4. Redirigimos la SALIDA estándar (stdout) al archivo de salida */
+    /* De esta forma, todos tus printf() irán al archivo automáticamente */
+    if (freopen(argv[2], "w", stdout) == NULL) {
+        fprintf(stderr, "Error: No se pudo crear el archivo de salida '%s'\n", argv[2]);
+        fclose(input);
+        return 1;
+    }
+
+    /* 5. (Opcional) Mensaje de inicio para el log de errores (stderr) */
+    fprintf(stderr, "--- Iniciando Compilacion ---\n");
+    fprintf(stderr, "Entrada: %s\n", argv[1]);
+    fprintf(stderr, "Salida:  %s\n", argv[2]);
+
+    /* 6. Ejecutamos el parser */
+    yyparse();
+
+    /* 7. Cerramos el archivo de entrada (stdout se cierra solo al terminar) */
+    fclose(input);
+    
+    fprintf(stderr, "--- Fin de la Compilacion ---\n");
     return 0;
 }

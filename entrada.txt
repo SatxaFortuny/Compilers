@@ -1,0 +1,178 @@
+/* =================================================================
+   ARCHIVO DE PRUEBAS INTEGRALES - CALCULADORA BISON/FLEX
+=================================================================
+   Este archivo prueba:
+   1. Declaraciones de variables (int, float, bool, string).
+   2. Asignaciones y re-asignaciones.
+   3. Aritmetica: +, -, *, /, %, ** (potencia).
+   4. Precedencia de operadores y parentesis.
+   5. Promocion de tipos (Int + Float).
+   6. Logica Booleana y Comparaciones.
+   7. Funciones (sin, cos, tan, LEN) y Constantes (PI, E).
+   8. Estructuras (Structs): Declaracion, listas y acceso.
+=================================================================
+*/
+
+/* -----------------------------------------------------------
+   BLOQUE 1: DECLARACIONES Y ASIGNACIONES BASICAS
+   ----------------------------------------------------------- */
+
+// Declaramos una variable de cada tipo
+int entero
+float decimal
+string texto
+bool bandera
+
+/*
+   Prueba de asignaciones.
+   Salida esperada:
+   BISON: Assigned variable 'entero'
+   BISON: Assigned variable 'decimal'
+   BISON: Assigned variable 'texto'
+   BISON: Assigned variable 'bandera'
+*/
+entero := 10
+decimal := 5.5
+texto := "Hola Mundo"
+bandera := true
+
+/* -----------------------------------------------------------
+   BLOQUE 2: ARITMETICA Y PRECEDENCIA
+   ----------------------------------------------------------- */
+
+/* Prueba de precedencia: Multiplicacion antes que suma.
+   Calculo: 2 + (3 * 4) = 14
+   Salida esperada: Result: 14 (TYPE_INT)
+*/
+2 + 3 * 4
+
+/* Prueba de potencia (prioridad maxima) y parentesis.
+   Calculo: (2 + 3) ^ 2 = 5 ^ 2 = 25
+   Salida esperada: Result: 25 (TYPE_INT)
+*/
+(2 + 3) ** 2
+
+/*
+   Prueba de Modulo (residuo).
+   Calculo: 10 % 3 = 1
+   Salida esperada: Result: 1 (TYPE_INT)
+*/
+10 % 3
+
+/*
+   Prueba de negativos unarios.
+   Calculo: -5 + 10 = 5
+   Salida esperada: Result: 5 (TYPE_INT)
+*/
+-5 + 10
+
+/* -----------------------------------------------------------
+   BLOQUE 3: TIPOS MIXTOS (PROMOCION)
+   ----------------------------------------------------------- */
+
+/*
+   Suma de Entero + Float.
+   Calculo: 10 (entero) + 5.5 (decimal) = 15.5
+   Salida esperada: Result: 15.500000 (TYPE_FLOAT)
+*/
+entero + decimal
+
+/*
+   Potencia con resultado Float.
+   Calculo: 2.5 ^ 2
+   Salida esperada: Result: 6.250000 (TYPE_FLOAT)
+*/
+2.5 ** 2
+
+/* -----------------------------------------------------------
+   BLOQUE 4: LOGICA Y COMPARACIONES
+   ----------------------------------------------------------- */
+
+/*
+   Comparacion simple.
+   Calculo: 10 > 5
+   Salida esperada: Result: true (TYPE_BOOL)
+*/
+entero > 5
+
+/*
+   Logica Booleana (AND).
+   Calculo: true AND false
+   Salida esperada: Result: false (TYPE_BOOL)
+*/
+bandera and false
+
+/*
+   Logica compleja con parentesis y NOT.
+   Calculo: not (10 < 5) -> not (false) -> true
+   Salida esperada: Result: true (TYPE_BOOL)
+*/
+not (entero < 5)
+
+/* -----------------------------------------------------------
+   BLOQUE 5: FUNCIONES Y CONSTANTES
+   ----------------------------------------------------------- */
+
+/*
+   Uso de PI.
+   Salida esperada: Result: 3.141593 (TYPE_FLOAT)
+*/
+PI
+
+/*
+   Funciones trigonometricas.
+   Calculo: sin(PI/2) -> sin(1.57...) = 1.0
+   Salida esperada: Result: 1.000000 (TYPE_FLOAT)
+*/
+sin(PI / 2)
+
+/*
+   Longitud de strings.
+   Calculo: LEN("Hola Mundo")
+   Salida esperada: Result: 10 (TYPE_INT)
+*/
+LEN(texto)
+
+/* -----------------------------------------------------------
+   BLOQUE 6: STRUCTS (EL JEFE FINAL)
+   ----------------------------------------------------------- */
+
+/* Definicion de un struct con lista de variables.
+   Salida esperada: 
+   BISON: Defining struct type 'Punto' ...
+   BISON: Struct instance 'p1' created.
+   BISON: Struct instance 'p2' created.
+*/
+struct Punto { 
+    int x; 
+    int y; 
+} p1, p2
+
+/* Asignacion a campos del struct.
+   Salida esperada:
+   BISON: Assigned field p1.x
+   BISON: Assigned field p1.y
+*/
+p1.x := 10
+p1.y := 20
+
+/*
+   Operaciones con campos de struct.
+   Calculo: p1.x + p1.y = 10 + 20 = 30
+   Salida esperada: Result: 30 (TYPE_INT)
+*/
+p1.x + p1.y
+
+/*
+   Prueba de la segunda instancia (p2) independiente.
+   p2 no debe tener basura, asignamos valores.
+*/
+p2.x := 100
+p2.y := 200
+
+/*
+   Calculo mixto entre structs.
+   Calculo: p1.x + p2.x = 10 + 100 = 110
+   Salida esperada: Result: 110 (TYPE_INT)
+*/
+p1.x + p2.x
