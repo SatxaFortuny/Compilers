@@ -25,6 +25,7 @@ This way we keep track of where the error is if there happens to be one*/
 "cos"        { return COS; }
 "tan"        { return TAN; }
 "LEN"        { return LEN; }
+"SUBSTR"     { return SUBSTR; }
 
 "struct"     { return STRUCT; }
 "{"          { return '{'; }
@@ -43,7 +44,7 @@ This way we keep track of where the error is if there happens to be one*/
 "false"      {
                 yylval.ival = 0;
                 return BOOL_LITERAL; }
-[0-9]+\.[0-9]+ {
+[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?|[0-9]+[eE][+-]?[0-9]+ {
                 yylval.fval = atof(yytext);
                 return FLOAT_LITERAL; }
 \"[^"\n]*\" {
@@ -64,7 +65,7 @@ This way we keep track of where the error is if there happens to be one*/
 "=="         { return EQ; }
 "<="         { return LE; }
 ">="         { return GE; }
-"!="         { return NE; }
+"<>"         { return NE; }
 "<"          { return LT; }
 ">"          { return GT; }
 

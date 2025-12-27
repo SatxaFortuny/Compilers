@@ -143,10 +143,7 @@ LEN(texto)
    BISON: Struct instance 'p1' created.
    BISON: Struct instance 'p2' created.
 */
-struct Punto { 
-    int x; 
-    int y; 
-} p1, p2
+struct Punto {     int x;     int y; } p1, p2
 
 /* Asignacion a campos del struct.
    Salida esperada:
@@ -176,3 +173,5 @@ p2.y := 200
    Salida esperada: Result: 110 (TYPE_INT)
 */
 p1.x + p2.x
+
+1e2

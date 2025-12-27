@@ -1,22 +1,22 @@
-/* A Bison parser, made by GNU Bison 3.8.2.  */
+/* A Bison parser, made by GNU Bison 2.4.2.  */
 
-/* Bison interface for Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
-   Inc.
-
+/* Skeleton interface for Bison's Yacc-like parsers in C
+   
+      Copyright (C) 1984, 1989-1990, 2000-2006, 2009-2010 Free Software
+   Foundation, Inc.
+   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -27,69 +27,56 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
-   especially those whose name start with YY_ or yy_.  They are
-   private implementation details that can be changed or removed.  */
 
-#ifndef YY_YY_CALC_TAB_H_INCLUDED
-# define YY_YY_CALC_TAB_H_INCLUDED
-/* Debug traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-#if YYDEBUG
-extern int yydebug;
-#endif
-
-/* Token kinds.  */
+/* Tokens.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-  enum yytokentype
-  {
-    YYEMPTY = -2,
-    YYEOF = 0,                     /* "end of file"  */
-    YYerror = 256,                 /* error  */
-    YYUNDEF = 257,                 /* "invalid token"  */
-    NUMBER = 258,                  /* NUMBER  */
-    ID = 259,                      /* ID  */
-    INT = 260,                     /* INT  */
-    FLOAT = 261,                   /* FLOAT  */
-    STRING = 262,                  /* STRING  */
-    BOOL = 263,                    /* BOOL  */
-    EOL = 264,                     /* EOL  */
-    FLOAT_LITERAL = 265,           /* FLOAT_LITERAL  */
-    STRING_LITERAL = 266,          /* STRING_LITERAL  */
-    BOOL_LITERAL = 267,            /* BOOL_LITERAL  */
-    ASSIGN = 268,                  /* ASSIGN  */
-    POWER = 269,                   /* POWER  */
-    EQ = 270,                      /* EQ  */
-    LE = 271,                      /* LE  */
-    GE = 272,                      /* GE  */
-    NE = 273,                      /* NE  */
-    LT = 274,                      /* LT  */
-    GT = 275,                      /* GT  */
-    AND = 276,                     /* AND  */
-    OR = 277,                      /* OR  */
-    NOT = 278,                     /* NOT  */
-    PI = 279,                      /* PI  */
-    E = 280,                       /* E  */
-    SIN = 281,                     /* SIN  */
-    COS = 282,                     /* COS  */
-    TAN = 283,                     /* TAN  */
-    LEN = 284,                     /* LEN  */
-    STRUCT = 285                   /* STRUCT  */
-  };
-  typedef enum yytokentype yytoken_kind_t;
+   /* Put the tokens into the symbol table, so that GDB and other debuggers
+      know about them.  */
+   enum yytokentype {
+     NUMBER = 258,
+     ID = 259,
+     INT = 260,
+     FLOAT = 261,
+     STRING = 262,
+     BOOL = 263,
+     EOL = 264,
+     FLOAT_LITERAL = 265,
+     STRING_LITERAL = 266,
+     BOOL_LITERAL = 267,
+     ASSIGN = 268,
+     POWER = 269,
+     EQ = 270,
+     LE = 271,
+     GE = 272,
+     NE = 273,
+     LT = 274,
+     GT = 275,
+     AND = 276,
+     OR = 277,
+     NOT = 278,
+     PI = 279,
+     E = 280,
+     SIN = 281,
+     COS = 282,
+     TAN = 283,
+     LEN = 284,
+     SUBSTR = 285,
+     STRUCT = 286
+   };
 #endif
 
-/* Value type.  */
+
+
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
+typedef union YYSTYPE
 {
+
+/* Line 1685 of yacc.c  */
 #line 27 "calc.y"
 
     int ival;
@@ -99,19 +86,16 @@ union YYSTYPE
     struct TempValue *expr;
     struct Token *tokens;
 
-#line 103 "calc.tab.h"
 
-};
-typedef union YYSTYPE YYSTYPE;
+
+/* Line 1685 of yacc.c  */
+#line 93 "calc.tab.h"
+} YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
+# define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
-
 
 extern YYSTYPE yylval;
 
 
-int yyparse (void);
-
-
-#endif /* !YY_YY_CALC_TAB_H_INCLUDED  */

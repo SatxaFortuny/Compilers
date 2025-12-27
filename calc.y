@@ -47,7 +47,7 @@ struct Token* copy_tokens(struct Token* source);
 %token ASSIGN
 %token POWER
 %token EQ LE GE NE LT GT AND OR NOT
-%token PI E SIN COS TAN LEN
+%token PI E SIN COS TAN LEN SUBSTR
 %token STRUCT
 
 %type <expr> or_predicate
@@ -189,31 +189,64 @@ expression:
     | expression '+' term {
         TempValue *res1 = $1;
         TempValue *res2 = $3;
-        
-        if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
+
+        if (res1->type == TYPE_STRING || res2->type == TYPE_STRING) {
+            char buffer1[100], buffer2[100];
+            char *str1, *str2;
+
+            /* Convertir primer operando a texto */
+            if (res1->type == TYPE_STRING) {
+                str1 = res1->value.s_val;
+            } else if (res1->type == TYPE_INT) {
+                sprintf(buffer1, "%d", res1->value.i_val);
+                str1 = buffer1;
+            } else if (res1->type == TYPE_FLOAT) {
+                sprintf(buffer1, "%g", res1->value.f_val);
+                str1 = buffer1;
+            } else { /* BOOL */
+                str1 = res1->value.b_val ? "true" : "false";
+            }
+
+            /* Convertir segundo operando a texto */
+            if (res2->type == TYPE_STRING) {
+                str2 = res2->value.s_val;
+            } else if (res2->type == TYPE_INT) {
+                sprintf(buffer2, "%d", res2->value.i_val);
+                str2 = buffer2;
+            } else if (res2->type == TYPE_FLOAT) {
+                sprintf(buffer2, "%g", res2->value.f_val);
+                str2 = buffer2;
+            } else { /* BOOL */
+                str2 = res2->value.b_val ? "true" : "false";
+            }
+
+            /* Reservar memoria y concatenar */
+            char *resultStr = (char*)malloc(strlen(str1) + strlen(str2) + 1);
+            strcpy(resultStr, str1);
+            strcat(resultStr, str2);
+
+            /* Liberar operandos viejos */
+            if (res1->type == TYPE_STRING) free(res1->value.s_val);
+            if (res2->type == TYPE_STRING) free(res2->value.s_val);
+            free(res2); // res1 se reutiliza
+
+            res1->type = TYPE_STRING;
+            res1->value.s_val = resultStr;
+            $$ = res1;
+        }
+        else if (res1->type == TYPE_INT && res2->type == TYPE_INT) {
             res1->value.i_val = res1->value.i_val + res2->value.i_val;
             free(res2);
             $$ = res1;
         }
-        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_FLOAT) {
-            res1->value.f_val = res1->value.f_val + res2->value.f_val;
-            free(res2);
-            $$ = res1;
-        }
-        else if (res1->type == TYPE_INT && res2->type == TYPE_FLOAT) {
-            res1->type = TYPE_FLOAT;
-            res1->value.f_val = (float)res1->value.i_val + res2->value.f_val;
-            free(res2);
-            $$ = res1;
-        }
-        else if (res1->type == TYPE_FLOAT && res2->type == TYPE_INT) {
-            res1->value.f_val = res1->value.f_val + (float)res2->value.i_val;
-            free(res2);
-            $$ = res1;
-        }
         else {
-            yyerror("Semanthic error: Uncompatible type for '+'");
-            $$ = 0;
+             float v1 = (res1->type == TYPE_INT) ? (float)res1->value.i_val : res1->value.f_val;
+             float v2 = (res2->type == TYPE_INT) ? (float)res2->value.i_val : res2->value.f_val;
+             
+             res1->type = TYPE_FLOAT;
+             res1->value.f_val = v1 + v2;
+             free(res2);
+             $$ = res1;
         }
     }
     | expression '-' term {
@@ -498,6 +531,32 @@ atom:
         }
         $$ = arg;
     }
+    | SUBSTR '(' expression ';' expression ';' expression ')' {
+        struct TempValue *str = $3;
+        struct TempValue *start = $5;
+        struct TempValue *len = $7;
+        if (str->type != TYPE_STRING || start->type != TYPE_INT || len->type != TYPE_INT) {
+             yyerror("Semantic Error: SUBSTR expects (string; int; int)");
+             $$ = str; 
+        } else {
+             int s_idx = start->value.i_val;
+             int l_val = len->value.i_val;
+             int max_len = strlen(str->value.s_val);
+             if (s_idx < 0) s_idx = 0;
+             if (s_idx > max_len) s_idx = max_len;
+             if (l_val < 0) l_val = 0;
+             if (s_idx + l_val > max_len) l_val = max_len - s_idx;
+             char *sub = (char*) malloc(l_val + 1);
+             strncpy(sub, str->value.s_val + s_idx, l_val);
+             sub[l_val] = '\0'; // Terminador nulo
+
+             free(str->value.s_val);
+             str->value.s_val = sub;
+             $$ = str;
+        }
+        free(start);
+        free(len);
+    }
     /* Acceso a miembro: ID . ID */
     | ID '.' ID {
         TokenValue *s;
@@ -656,6 +715,8 @@ assignation:
                         }
                         s->value.s_val = strdup(res->value.s_val);
                         break;
+                    default:
+                        break;
                 }
                 s->inicialized = true;
                 printf("BISON: Assigned variable '%s'\n", $1);
@@ -725,6 +786,8 @@ void print_result(struct TempValue *res) {
             break;
         case TYPE_BOOL:
             printf("%s (TYPE_BOOL)\n", res->value.b_val ? "true" : "false");
+            break;
+        default:
             break;
     }
 }
@@ -802,15 +865,6 @@ struct Token* copy_tokens(struct Token* source) {
     
     return new_node;
 }
-
-/* ... (Tus includes y definiciones de arriba siguen igual) ... */
-
-/* Añade esto justo debajo de los includes en la sección %{ ... %} o antes del main */
-extern FILE *yyin; /* Variable global de Flex para el archivo de entrada */
-
-/* ... (Todo tu código de gramática sigue igual) ... */
-
-/* ... (Tus funciones auxiliares print_result, yyerror, etc. siguen igual) ... */
 
 int main(int argc, char **argv) {
     
