@@ -1,0 +1,70 @@
+BISON: EOL
+BISON: EOL
+BISON: EOL
+BISON: EOL
+1: a := 10
+2: x := -5.50000
+3: $t01 := CHSI a
+4: b := $t01
+BISON: EOL
+BISON: EOL
+BISON: EOL
+5: i := 14
+6: y := 5.00000
+BISON: EOL
+BISON: EOL
+7: $t02 := I2F a
+8: y := $t02
+9: pi := 3.14159
+10: $t03 := I2F a
+11: $t04 := pi ADDF $t03
+12: x := $t04
+BISON: EOL
+BISON: EOL
+13: $t05 := 10 MODI 3
+14: comptador := $t05
+15: $t06 := 1
+16: $t07 := 3
+17: GOTO 20
+18: $t06 := $t06 MULI 2
+19: $t07 := $t07 SUBI 1
+20: IF $t07 > 0 GOTO 18
+21: a := $t06
+BISON: EOL
+BISON: EOL
+22: vector[0] := 100
+23: $t08 := vector[0]
+24: $t09 := $t08 ADDI 50
+25: vector[1] := $t09
+26: $t10 := I2F a
+27: matriu[0] := $t10
+BISON: EOL
+BISON: EOL
+BISON: EOL
+28: $t11 := 3
+BISON: EOL
+29: $t12 := vector[0]
+30: $t13 := $t12 ADDI 1
+31: vector[0] := $t13
+BISON: EOL
+BISON: EOL
+32: $t14 := 2
+BISON: EOL
+33: $t15 := matriu[0]
+34: $t16 := $t15 ADDF 1.00000
+35: matriu[0] := $t16
+36: $t14 := $t14 SUBI 1
+37: IF $t14 > 0 GOTO 33
+38: $t11 := $t11 SUBI 1
+39: IF $t11 > 0 GOTO 29
+BISON: EOL
+BISON: EOL
+40: $t17 := vector[0]
+41: PARAM $t17
+42: CALL PUTI, 1
+43: $t18 := matriu[0]
+44: PARAM $t18
+45: CALL PUTF, 1
+46: PARAM x
+47: CALL PUTF, 1
+48: HALT

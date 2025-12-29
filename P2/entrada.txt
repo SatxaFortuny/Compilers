@@ -1,0 +1,58 @@
+/* TEST COMPLET DE LA PRÀCTICA 2 
+   -----------------------------
+   Aquest fitxer prova:
+   1. Declaracions (int, float, arrays)
+   2. Comentaris (//, #, i blocs)
+   3. Optimització (Constant Folding)
+   4. Conversions de tipus (Casting)
+   5. Operacions complexes (%, **)
+   6. Bucles i Arrays
+   7. Sortida per pantalla (PUT)
+*/
+
+int a, b, i, comptador
+float x, y, pi
+int vector[5]
+float matriu[3]
+
+// --- 1. PROVA D'ASSIGNACIONS I UNARIS ---
+a := 10
+x := -5.5           // Menys unari float
+b := -a             // Menys unari int (b = -10)
+
+# --- 2. PROVA D'OPTIMITZACIÓ (CONSTANT FOLDING) ---
+// Aquestes operacions s'han de calcular ARA, no al C3A
+i := 2 + 3 * 4      // Ha de guardar 14 directament, sense generar ADDI/MULI
+y := 10.0 / 2.0     // Ha de guardar 5.0 directament
+
+// --- 3. PROVA DE CONVERSIONS (IMPLÍCITES) ---
+y := a              // Assignar Int a Float (genera I2F)
+pi := 3.14159
+x := pi + a         // Suma Float + Int (genera I2F per a 'a')
+
+// --- 4. PROVA D'OPERADORS ESPECIALS ---
+comptador := 10 % 3 // Mòdul (ha de donar 1)
+a := 2 ** 3         // Potència (ha de generar un bucle i donar 8)
+
+// --- 5. PROVA D'ARRAYS ---
+vector[0] := 100
+vector[1] := vector[0] + 50
+matriu[0] := a      // Assignar int a array float (Casting)
+
+// --- 6. PROVA DE BUCLES NIUATS (REPEAT) ---
+// El bucle extern es fa 3 cops
+repeat 3 do
+    vector[0] := vector[0] + 1
+    
+    // El bucle intern es fa 2 cops per cada volta (total 6 cops)
+    repeat 2 do
+        matriu[0] := matriu[0] + 1.0
+    done
+done
+
+/* --- 7. SORTIDA PER PANTALLA (NOVES INSTRUCCIONS) ---
+   Les expressions soles generen un PARAM + CALL PUT
+*/
+vector[0]   // Ha d'imprimir 103 (100 + 3 voltes)
+matriu[0]   // Ha d'imprimir 14.0 (8 inicial + 6 voltes)
+x           // Ha d'imprimir 13.14159
