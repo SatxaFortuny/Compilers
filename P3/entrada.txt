@@ -1,0 +1,71 @@
+// 1. Declaracio de variables
+int a, b, cnt
+int i
+float x, y
+bool cond, flag
+
+int v[5]
+
+// 2. Assignacions
+a := 10
+b := 3
+x := 2.5
+
+// Aritmetica
+y := a + x
+cnt := 2 ** 3
+a := a % 4
+
+// 3. Arrays
+v[0] := 100
+v[1] := 200
+v[2] := v[0] + v[1]
+
+// 4. IF
+if a > 0 and (b < 10 or not false) then
+    flag := true
+    b := 999
+else
+    flag := false
+    b := 0
+fi
+
+// 5. WHILE
+a := 0
+while a < 5 do
+    a := a + 1
+    v[0] := a * 10
+done
+
+// 6. DO - UNTIL
+cnt := 10
+do
+    cnt := cnt - 1
+until cnt == 0
+
+// 7. REPEAT
+repeat 3 do
+    b := b + 1
+done
+
+// 8. FOR 
+for i in 1 .. 5 do
+    b := b + i
+done
+
+// 9. SWITCH
+a := 2
+switch a
+case 1:
+    b := 111
+    break
+case 2:
+    b := 222
+    break
+case 3:
+    b := 333
+    break
+fswitch
+
+// Final
+a := 0

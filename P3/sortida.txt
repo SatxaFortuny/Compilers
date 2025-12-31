@@ -1,0 +1,65 @@
+1: a := 10
+2: b := 3
+3: x := 2.50000
+4: $t02 := I2F a
+5: $t01 := $t02 ADDF x
+6: y := $t01
+7: $t03 := 1
+8: cnt := $t03
+9: $t04 := a MODI 4
+10: a := $t04
+11: v[0] := 100
+12: v[1] := 200
+13: $t05 := v[0]
+14: $t06 := v[1]
+15: $t07 := $t05 ADDI $t06
+16: v[2] := $t07
+17: IF a > 0 GOTO 19
+18: GOTO 26
+19: IF b < 10 GOTO 22
+20: GOTO 21
+21: GOTO 22
+22: GOTO 23
+23: flag := 1
+24: b := 999
+25: GOTO 29
+26: GOTO 27
+27: flag := 0
+28: b := 0
+29: a := 0
+30: IF a < 5 GOTO 32
+31: GOTO 37
+32: $t08 := a ADDI 1
+33: a := $t08
+34: $t09 := a MULI 10
+35: v[0] := $t09
+36: GOTO 30
+37: cnt := 10
+38: $t10 := cnt SUBI 1
+39: cnt := $t10
+40: IF cnt = 0 GOTO 42
+41: GOTO 38
+42: $t11 := 3
+43: $t12 := b ADDI 1
+44: b := $t12
+45: $t11 := $t11 SUBI 1
+46: IF $t11 > 0 GOTO 43
+47: i := 1
+48: IF i > 5 GOTO 54
+49: $t13 := b ADDI i
+50: b := $t13
+51: $t14 := i ADDI 1
+52: i := $t14
+53: GOTO 48
+54: a := 2
+55: b := 111
+56: IF a != 1 GOTO 58
+57: GOTO 64
+58: b := 222
+59: IF a != 2 GOTO 61
+60: GOTO 64
+61: b := 333
+62: IF a != 3 GOTO 64
+63: GOTO 64
+64: a := 0
+65: HALT
