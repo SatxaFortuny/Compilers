@@ -57,31 +57,33 @@ void emit_array_store(char *arr_name, char *index, char *src);
 %%
 
 /* Now we will try to classify everything into a program. Which is defined by a series of lines */
-program: stmt_list ;
+program: stmt_list { fprintf(stderr, "BISON: [program] matched.\n"); } ;
 
 stmt_list:
     | stmt_list line
     ;
 
 line:
-    stmt EOL 
-    | EOL          { printf("BISON: EOL\n"); }
-    | error EOL    { printf("BISON: Error, next line.\n"); yyerrok; }
+    stmt EOL       { fprintf(stderr, "BISON: [line] Stmt + EOL matched.\n"); }
+    | EOL          { fprintf(stderr, "BISON: [line] Empty EOL matched.\n"); }
+    | error EOL    { fprintf(stderr, "BISON: Error found, skipping to next line.\n"); yyerrok; }
     ;
 
 stmt:
     expression { 
+        fprintf(stderr, "BISON: [stmt] Expression statement matched.\n");
         emit("PARAM", $1->addr, NULL, NULL);
         if ($1->type == TYPE_INT) emit("CALL", "PUTI", "1", NULL);
         else emit("CALL", "PUTF", "1", NULL);
     }
-    | declaration  {  }
-    | assignation  {  }
-    | iteration    {  }
+    | declaration  { fprintf(stderr, "BISON: [stmt] Declaration matched.\n"); }
+    | assignation  { fprintf(stderr, "BISON: [stmt] Assignation matched.\n"); }
+    | iteration    { fprintf(stderr, "BISON: [stmt] Iteration matched.\n"); }
     ;
 
 iteration:
     loop_header stmt_list DONE {
+        fprintf(stderr, "BISON: [iteration] Loop block closed.\n");
         int start_line = $1->type;
         char *counter = $1->addr;
 
@@ -96,6 +98,7 @@ iteration:
 
 loop_header:
     REPEAT expression DO {
+        fprintf(stderr, "BISON: [loop_header] REPEAT start.\n");
         $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
         
         if ($2->type != TYPE_INT) {
@@ -116,6 +119,7 @@ loop_header:
 expression:
     term { $$ = $1; }
     | expression '+' term {
+        fprintf(stderr, "BISON: [expression] ADD (+).\n");
         $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
         if ($1->is_const && $3->is_const) {
             $$->is_const = 1;
@@ -169,6 +173,7 @@ expression:
         }
     }
     | expression '-' term {
+        fprintf(stderr, "BISON: [expression] SUB (-).\n");
         $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
         
         if ($1->is_const && $3->is_const) {
@@ -205,6 +210,7 @@ expression:
 term:
     unary { $$ = $1; } 
     | term '*' unary {
+        fprintf(stderr, "BISON: [term] MUL (*).\n");
         $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
         
         if ($1->is_const && $3->is_const) {
@@ -237,6 +243,7 @@ term:
         }
     }
     | term '/' unary {
+        fprintf(stderr, "BISON: [term] DIV (/).\n");
         $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
         
         if ($1->is_const && $3->is_const) {
@@ -269,6 +276,7 @@ term:
         }
     }
     | term '%' unary {
+        fprintf(stderr, "BISON: [term] MOD (%%).\n");
         $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
 
         /* INT % INT */
@@ -287,6 +295,7 @@ term:
 unary:
     pow { $$ = $1; }
     | '-' unary {
+        fprintf(stderr, "BISON: [unary] Negative sign.\n");
         $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
         
         if ($2->is_const) {
@@ -309,6 +318,7 @@ unary:
         }
     }
     | '+' unary { 
+        fprintf(stderr, "BISON: [unary] Positive sign.\n");
         $$ = $2; 
     } 
     ;
@@ -316,7 +326,7 @@ unary:
 pow:
     atom { $$ = $1; }
     | atom POWER pow {
-        
+        fprintf(stderr, "BISON: [pow] Power operaton.\n");
         $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
         
         if ($3->type != TYPE_INT) {
@@ -355,6 +365,7 @@ pow:
 
 atom:
     NUMBER {
+        fprintf(stderr, "BISON: [atom] Found NUMBER.\n");
         $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
         $$->type = TYPE_INT;
         
@@ -365,6 +376,7 @@ atom:
         $$->val = (float)$1;
     }
     | FLOAT_LITERAL {
+        fprintf(stderr, "BISON: [atom] Found FLOAT_LITERAL.\n");
         $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
         $$->type = TYPE_FLOAT;
         
@@ -375,6 +387,7 @@ atom:
         $$->val = $1;
     }
     | ID {
+        fprintf(stderr, "BISON: [atom] Found ID variable.\n");
         TokenValue *s;
         $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
         
@@ -391,6 +404,7 @@ atom:
         free($1); 
     }
     | ID '[' expression ']' {
+        fprintf(stderr, "BISON: [atom] Found Array access.\n");
         TokenValue *s;
         $$ = (struct TempValue*) malloc(sizeof(struct TempValue));
         
@@ -416,6 +430,7 @@ atom:
         free($1);
     }
     | '(' expression ')' {
+        fprintf(stderr, "BISON: [atom] Parenthesis expression.\n");
         $$ = $2; 
     }
     ;
@@ -436,6 +451,7 @@ var_list:
 
 var_item:
     ID {
+        fprintf(stderr, "BISON: [var_item] Declaring scalar ID.\n");
         TokenValue *dummy;
         
         if (sym_lookup($1, &dummy) != SYMTAB_NOT_FOUND) {
@@ -454,6 +470,7 @@ var_item:
     }
     /* ARRAY: x[10] */
     | ID '[' NUMBER ']' {
+        fprintf(stderr, "BISON: [var_item] Declaring ARRAY.\n");
         TokenValue *dummy;
         
         if (sym_lookup($1, &dummy) != SYMTAB_NOT_FOUND) {
@@ -474,6 +491,7 @@ var_item:
 
 assignation:
     ID ASSIGN expression { 
+        fprintf(stderr, "BISON: [assignation] ID := Expr.\n");
         TokenValue *s;
         struct TempValue *res = $3; 
 
@@ -499,6 +517,7 @@ assignation:
         free($1);
     }
     | ID '[' expression ']' ASSIGN expression {
+        fprintf(stderr, "BISON: [assignation] ID[] := Expr.\n");
         TokenValue *s;
         struct TempValue *idx = $3; 
         struct TempValue *val = $6; 

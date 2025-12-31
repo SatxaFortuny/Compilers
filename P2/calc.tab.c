@@ -466,10 +466,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    60,    60,    62,    63,    67,    68,    69,    73,    78,
-      79,    80,    84,   103,   128,   129,   185,   220,   221,   253,
-     286,   303,   304,   327,   333,   334,   392,   404,   415,   435,
-     466,   472,   477,   478,   483,   484,   490,   509,   529,   557
+       0,    60,    60,    62,    63,    67,    68,    69,    73,    79,
+      80,    81,    85,   100,   120,   121,   175,   211,   212,   245,
+     278,   296,   297,   320,   327,   328,   367,   378,   389,   406,
+     432,   439,   443,   444,   448,   449,   453,   472,   493,   519
 };
 #endif
 
@@ -1417,18 +1417,32 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 6:
+        case 2:
+
+/* Line 1464 of yacc.c  */
+#line 60 "./calc.y"
+    { fprintf(stderr, "BISON: [program] matched.\n"); ;}
+    break;
+
+  case 5:
+
+/* Line 1464 of yacc.c  */
+#line 67 "./calc.y"
+    { fprintf(stderr, "BISON: [line] Stmt + EOL matched.\n"); ;}
+    break;
+
+  case 6:
 
 /* Line 1464 of yacc.c  */
 #line 68 "./calc.y"
-    { printf("BISON: EOL\n"); ;}
+    { fprintf(stderr, "BISON: [line] Empty EOL matched.\n"); ;}
     break;
 
   case 7:
 
 /* Line 1464 of yacc.c  */
 #line 69 "./calc.y"
-    { printf("BISON: Error, next line.\n"); yyerrok; ;}
+    { fprintf(stderr, "BISON: Error found, skipping to next line.\n"); yyerrok; ;}
     break;
 
   case 8:
@@ -1436,6 +1450,7 @@ yyreduce:
 /* Line 1464 of yacc.c  */
 #line 73 "./calc.y"
     { 
+        fprintf(stderr, "BISON: [stmt] Expression statement matched.\n");
         emit("PARAM", (yyvsp[(1) - (1)].expr)->addr, NULL, NULL);
         if ((yyvsp[(1) - (1)].expr)->type == TYPE_INT) emit("CALL", "PUTI", "1", NULL);
         else emit("CALL", "PUTF", "1", NULL);
@@ -1445,40 +1460,37 @@ yyreduce:
   case 9:
 
 /* Line 1464 of yacc.c  */
-#line 78 "./calc.y"
-    { /* Ja genera el seu codi dins la regla */ ;}
+#line 79 "./calc.y"
+    { fprintf(stderr, "BISON: [stmt] Declaration matched.\n"); ;}
     break;
 
   case 10:
 
 /* Line 1464 of yacc.c  */
-#line 79 "./calc.y"
-    { /* Ja genera el seu codi dins la regla */ ;}
+#line 80 "./calc.y"
+    { fprintf(stderr, "BISON: [stmt] Assignation matched.\n"); ;}
     break;
 
   case 11:
 
 /* Line 1464 of yacc.c  */
-#line 80 "./calc.y"
-    { /* La nova regla per bucles */ ;}
+#line 81 "./calc.y"
+    { fprintf(stderr, "BISON: [stmt] Iteration matched.\n"); ;}
     break;
 
   case 12:
 
 /* Line 1464 of yacc.c  */
-#line 84 "./calc.y"
+#line 85 "./calc.y"
     {
-        /* Aquí recuperem la info del loop_header ($1) */
+        fprintf(stderr, "BISON: [iteration] Loop block closed.\n");
         int start_line = (yyvsp[(1) - (3)].expr)->type;
         char *counter = (yyvsp[(1) - (3)].expr)->addr;
 
-        /* 1. Decrementem el comptador: cnt := cnt - 1 */
         emit("SUBI", counter, "1", counter);
 
-        /* 2. Salt condicional: IF cnt > 0 GOTO start */
         emit_if_goto(counter, start_line);
         
-        /* Neteja */
         free((yyvsp[(1) - (3)].expr));
     ;}
     break;
@@ -1486,44 +1498,39 @@ yyreduce:
   case 13:
 
 /* Line 1464 of yacc.c  */
-#line 103 "./calc.y"
+#line 100 "./calc.y"
     {
+        fprintf(stderr, "BISON: [loop_header] REPEAT start.\n");
         (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
         
         if ((yyvsp[(2) - (3)].expr)->type != TYPE_INT) {
             yyerror("Error: El comptador del REPEAT ha de ser enter");
         }
 
-        /* 1. Creem el comptador temporal */
         char *counter = newTemp();
-        emit_move((yyvsp[(2) - (3)].expr)->addr, counter); /* $t_cnt := expressió */
+        emit_move((yyvsp[(2) - (3)].expr)->addr, counter); 
 
-        /* 2. Guardem la línia actual com a INICI del bucle */
-        /* Aquesta és la línia on saltarem per repetir */
         int start_line = get_current_line();
 
-        /* 3. Empaquetem la info per passar-la al DONE */
-        (yyval.expr)->type = start_line;   /* TRUC: Guardem l'enter a 'type' */
-        (yyval.expr)->addr = counter;      /* Guardem el nom del comptador */
+        (yyval.expr)->type = start_line;  
+        (yyval.expr)->addr = counter;     
         
-        /* Nota: Amb aquesta estructura (Post-Check), el bucle s'executa 
-           almenys 1 vegada. Per fer-ho exacte caldrien etiquetes alfanumèriques. */
     ;}
     break;
 
   case 14:
 
 /* Line 1464 of yacc.c  */
-#line 128 "./calc.y"
+#line 120 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 15:
 
 /* Line 1464 of yacc.c  */
-#line 129 "./calc.y"
+#line 121 "./calc.y"
     {
-        /* Reservem resultat */
+        fprintf(stderr, "BISON: [expression] ADD (+).\n");
         (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
         if ((yyvsp[(1) - (3)].expr)->is_const && (yyvsp[(3) - (3)].expr)->is_const) {
             (yyval.expr)->is_const = 1;
@@ -1539,16 +1546,14 @@ yyreduce:
                 sprintf(buf, "%.5f", (yyval.expr)->val);
             }
             (yyval.expr)->addr = strdup(buf);
-            /* NO EMETEM C3A! */
         } 
-        /* CAS NORMAL: Generem Codi */
         else {
             (yyval.expr)->is_const = 0;
             /* CAS 1: INT + INT */
             if ((yyvsp[(1) - (3)].expr)->type == TYPE_INT && (yyvsp[(3) - (3)].expr)->type == TYPE_INT) {
                 (yyval.expr)->type = TYPE_INT;
-                (yyval.expr)->addr = newTemp(); /* Demanem temporal: $t1 */
-                emit("ADDI", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, (yyval.expr)->addr); /* $t1 := a ADDI 5 */
+                (yyval.expr)->addr = newTemp(); 
+                emit("ADDI", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, (yyval.expr)->addr); 
             }
             /* CAS 2: FLOAT + FLOAT */
             else if ((yyvsp[(1) - (3)].expr)->type == TYPE_FLOAT && (yyvsp[(3) - (3)].expr)->type == TYPE_FLOAT) {
@@ -1559,12 +1564,12 @@ yyreduce:
             /* CAS 3: INT + FLOAT (Conversió del primer) */
             else if ((yyvsp[(1) - (3)].expr)->type == TYPE_INT && (yyvsp[(3) - (3)].expr)->type == TYPE_FLOAT) {
                 (yyval.expr)->type = TYPE_FLOAT;
-                char *t_conv = newTemp(); /* Temporal per la conversió */
+                char *t_conv = newTemp(); 
                 
-                emit_unary("I2F", (yyvsp[(1) - (3)].expr)->addr, t_conv); /* $t1 := I2F var_int */
+                emit_unary("I2F", (yyvsp[(1) - (3)].expr)->addr, t_conv);
                 
-                (yyval.expr)->addr = newTemp(); /* Temporal pel resultat final */
-                emit("ADDF", t_conv, (yyvsp[(3) - (3)].expr)->addr, (yyval.expr)->addr); /* $t2 := $t1 ADDF var_float */
+                (yyval.expr)->addr = newTemp(); 
+                emit("ADDF", t_conv, (yyvsp[(3) - (3)].expr)->addr, (yyval.expr)->addr); 
             }
             /* CAS 4: FLOAT + INT (Conversió del segon) */
             else if ((yyvsp[(1) - (3)].expr)->type == TYPE_FLOAT && (yyvsp[(3) - (3)].expr)->type == TYPE_INT) {
@@ -1583,8 +1588,9 @@ yyreduce:
   case 16:
 
 /* Line 1464 of yacc.c  */
-#line 185 "./calc.y"
+#line 175 "./calc.y"
     {
+        fprintf(stderr, "BISON: [expression] SUB (-).\n");
         (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
         
         if ((yyvsp[(1) - (3)].expr)->is_const && (yyvsp[(3) - (3)].expr)->is_const) {
@@ -1621,15 +1627,16 @@ yyreduce:
   case 17:
 
 /* Line 1464 of yacc.c  */
-#line 220 "./calc.y"
+#line 211 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 18:
 
 /* Line 1464 of yacc.c  */
-#line 221 "./calc.y"
+#line 212 "./calc.y"
     {
+        fprintf(stderr, "BISON: [term] MUL (*).\n");
         (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
         
         if ((yyvsp[(1) - (3)].expr)->is_const && (yyvsp[(3) - (3)].expr)->is_const) {
@@ -1666,14 +1673,14 @@ yyreduce:
   case 19:
 
 /* Line 1464 of yacc.c  */
-#line 253 "./calc.y"
+#line 245 "./calc.y"
     {
+        fprintf(stderr, "BISON: [term] DIV (/).\n");
         (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
         
         if ((yyvsp[(1) - (3)].expr)->is_const && (yyvsp[(3) - (3)].expr)->is_const) {
             (yyval.expr)->is_const = 1;
             char buf[30];
-            /* Nota: Aquí assumim que no divideixes per 0 */
             if ((yyvsp[(1) - (3)].expr)->type == TYPE_INT && (yyvsp[(3) - (3)].expr)->type == TYPE_INT) {
                 (yyval.expr)->type = TYPE_INT;
                 (yyval.expr)->val = (yyvsp[(1) - (3)].expr)->val / (yyvsp[(3) - (3)].expr)->val; /* DIV */
@@ -1705,8 +1712,9 @@ yyreduce:
   case 20:
 
 /* Line 1464 of yacc.c  */
-#line 286 "./calc.y"
+#line 278 "./calc.y"
     {
+        fprintf(stderr, "BISON: [term] MOD (%%).\n");
         (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
 
         /* INT % INT */
@@ -1725,22 +1733,22 @@ yyreduce:
   case 21:
 
 /* Line 1464 of yacc.c  */
-#line 303 "./calc.y"
+#line 296 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 22:
 
 /* Line 1464 of yacc.c  */
-#line 304 "./calc.y"
+#line 297 "./calc.y"
     {
+        fprintf(stderr, "BISON: [unary] Negative sign.\n");
         (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
         
-        /* OPTIMITZACIÓ: Si l'operand és constant (ex: "5"), el resultat és constant (ex: "-5") */
         if ((yyvsp[(2) - (2)].expr)->is_const) {
             (yyval.expr)->is_const = 1;
             (yyval.expr)->type = (yyvsp[(2) - (2)].expr)->type;
-            (yyval.expr)->val = -((yyvsp[(2) - (2)].expr)->val); /* Calculem el negatiu aquí */
+            (yyval.expr)->val = -((yyvsp[(2) - (2)].expr)->val); 
             
             char buf[30];
             if ((yyval.expr)->type == TYPE_INT) sprintf(buf, "%d", (int)(yyval.expr)->val);
@@ -1761,90 +1769,71 @@ yyreduce:
   case 23:
 
 /* Line 1464 of yacc.c  */
-#line 327 "./calc.y"
+#line 320 "./calc.y"
     { 
-        (yyval.expr) = (yyvsp[(2) - (2)].expr); /* El + unari no fa res (+5 és 5) */
+        fprintf(stderr, "BISON: [unary] Positive sign.\n");
+        (yyval.expr) = (yyvsp[(2) - (2)].expr); 
     ;}
     break;
 
   case 24:
 
 /* Line 1464 of yacc.c  */
-#line 333 "./calc.y"
+#line 327 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 25:
 
 /* Line 1464 of yacc.c  */
-#line 334 "./calc.y"
+#line 328 "./calc.y"
     {
-        /* $1 és la BASE, $3 és l'EXPONENT */
-        
+        fprintf(stderr, "BISON: [pow] Power operaton.\n");
         (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
         
-        /* 1. Comprovació de tipus (Exponent ha de ser ENTER) */
         if ((yyvsp[(3) - (3)].expr)->type != TYPE_INT) {
             yyerror("Error Semàntic: L'exponent ha de ser enter.");
-            /* Recuperació d'errors */
             (yyval.expr)->type = TYPE_INT;
             (yyval.expr)->addr = strdup("1");
         } else {
-            /* 2. Inicialització de variables */
-            
-            /* RESULTAT ($$): Comença valent 1 */
-            (yyval.expr)->type = (yyvsp[(1) - (3)].expr)->type; /* El resultat tindrà el tipus de la base */
+
+            (yyval.expr)->type = (yyvsp[(1) - (3)].expr)->type; 
             (yyval.expr)->addr = newTemp();
             if ((yyval.expr)->type == TYPE_INT) emit_move("1", (yyval.expr)->addr);
             else                      emit_move("1.0", (yyval.expr)->addr);
 
-            /* COMPTADOR (t_cnt): Copiem l'exponent */
             char *t_cnt = newTemp();
             emit_move((yyvsp[(3) - (3)].expr)->addr, t_cnt);
 
-            /* 3. Gestió de Salts i Línies */
-            
-            /* Guardem on comença el bucle (per tornar-hi després) */
-            /* +1 perquè la línia actual serà el GOTO d'entrada que escriurem ara */
+
             int linia_inici_bucle = get_current_line() + 1;
             
-            /* Saltem a la comprovació (Salt endavant) */
-            /* Saltem 2 instruccions: la multiplicació i la resta */
+
             emit_goto_line(get_current_line() + 3);
 
-            /* --- COS DEL BUCLE (Aquí és on cau linia_inici_bucle) --- */
-            
-            /* A. Multiplicació: res = res * base */
             if ((yyval.expr)->type == TYPE_INT) {
                 emit("MULI", (yyval.expr)->addr, (yyvsp[(1) - (3)].expr)->addr, (yyval.expr)->addr);
             } else {
                 emit("MULF", (yyval.expr)->addr, (yyvsp[(1) - (3)].expr)->addr, (yyval.expr)->addr);
             }
 
-            /* B. Decrement: cnt = cnt - 1 */
             emit("SUBI", t_cnt, "1", t_cnt);
 
-            /* --- COMPROVACIÓ (Aquí és on cau el GOTO inicial) --- */
-            
-            /* Si el comptador encara és > 0, tornem a dalt */
             emit_if_goto(t_cnt, linia_inici_bucle);
         }
         
-        /* Neteja (Opcional) */
-        /* free($1); free($3); */
     ;}
     break;
 
   case 26:
 
 /* Line 1464 of yacc.c  */
-#line 392 "./calc.y"
+#line 367 "./calc.y"
     {
-        /* 1. Reservem espai pel paquet d'informació que pujarà */
+        fprintf(stderr, "BISON: [atom] Found NUMBER.\n");
         (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_INT;
         
-        /* 2. Convertim el número enter a text ("5") */
         char buffer[20];
         sprintf(buffer, "%d", (yyvsp[(1) - (1)].ival));
         (yyval.expr)->addr = strdup(buffer);
@@ -1856,12 +1845,12 @@ yyreduce:
   case 27:
 
 /* Line 1464 of yacc.c  */
-#line 404 "./calc.y"
+#line 378 "./calc.y"
     {
+        fprintf(stderr, "BISON: [atom] Found FLOAT_LITERAL.\n");
         (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_FLOAT;
         
-        /* Convertim el float a text ("3.14") */
         char buffer[30];
         sprintf(buffer, "%.5f", (yyvsp[(1) - (1)].fval)); 
         (yyval.expr)->addr = strdup(buffer);
@@ -1873,102 +1862,95 @@ yyreduce:
   case 28:
 
 /* Line 1464 of yacc.c  */
-#line 415 "./calc.y"
+#line 389 "./calc.y"
     {
+        fprintf(stderr, "BISON: [atom] Found ID variable.\n");
         TokenValue *s;
         (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
         
-        /* 3. Mirem si la variable existeix a la taula */
         if (sym_lookup((yyvsp[(1) - (1)].sval), &s) == SYMTAB_NOT_FOUND) {
             yyerror("Error: Variable no declarada");
-            /* Recuperació d'errors: ens inventem un valor segur */
             (yyval.expr)->type = TYPE_INT;
             (yyval.expr)->addr = strdup("0"); 
         } else {
-            /* Tot bé: copiem el tipus i el NOM de la variable ("x") */
             (yyval.expr)->type = s->type;
             (yyval.expr)->addr = strdup(s->name); 
             
-            /* TODO: Més endavant aquí mirarem si és un Array */
         }
         (yyval.expr)->is_const = 0;
-        free((yyvsp[(1) - (1)].sval)); /* Ja no necessitem el text cru del Flex */
+        free((yyvsp[(1) - (1)].sval)); 
     ;}
     break;
 
   case 29:
 
 /* Line 1464 of yacc.c  */
-#line 435 "./calc.y"
+#line 406 "./calc.y"
     {
+        fprintf(stderr, "BISON: [atom] Found Array access.\n");
         TokenValue *s;
         (yyval.expr) = (struct TempValue*) malloc(sizeof(struct TempValue));
         
-        /* 1. Comprovar que existeix */
         if (sym_lookup((yyvsp[(1) - (4)].sval), &s) == SYMTAB_NOT_FOUND) {
             yyerror("Error: Array no declarat");
             (yyval.expr)->type = TYPE_INT; (yyval.expr)->addr = strdup("0");
         } 
-        /* 2. Comprovar que és realment un array (size > 1) */
         else if (s->size == 1) {
             yyerror("Error Semàntic: La variable no és un array.");
             (yyval.expr)->type = TYPE_INT; (yyval.expr)->addr = strdup("0");
         }
-        /* 3. Comprovar que l'índex és enter */
         else if ((yyvsp[(3) - (4)].expr)->type != TYPE_INT) {
             yyerror("Error Semàntic: L'índex ha de ser enter.");
             (yyval.expr)->type = TYPE_INT; (yyval.expr)->addr = strdup("0");
         }
         else {
-            /* 4. Generar codi */
-            (yyval.expr)->type = s->type;      /* El tipus del resultat és el de l'array */
-            (yyval.expr)->addr = newTemp();    /* Nou temporal pel resultat */
+            (yyval.expr)->type = s->type;      
+            (yyval.expr)->addr = newTemp();    
             
-            /* Generem: $t1 := nom_array[index_addr] */
             emit_array_load(s->name, (yyvsp[(3) - (4)].expr)->addr, (yyval.expr)->addr);
         }
         (yyval.expr)->is_const = 0;
         free((yyvsp[(1) - (4)].sval));
-        /* free($3); */
     ;}
     break;
 
   case 30:
 
 /* Line 1464 of yacc.c  */
-#line 466 "./calc.y"
+#line 432 "./calc.y"
     {
-        (yyval.expr) = (yyvsp[(2) - (3)].expr); /* Els parèntesis només passen la info amunt */
+        fprintf(stderr, "BISON: [atom] Parenthesis expression.\n");
+        (yyval.expr) = (yyvsp[(2) - (3)].expr); 
     ;}
     break;
 
   case 32:
 
 /* Line 1464 of yacc.c  */
-#line 477 "./calc.y"
+#line 443 "./calc.y"
     { current_type = TYPE_INT; ;}
     break;
 
   case 33:
 
 /* Line 1464 of yacc.c  */
-#line 478 "./calc.y"
+#line 444 "./calc.y"
     { current_type = TYPE_FLOAT; ;}
     break;
 
   case 36:
 
 /* Line 1464 of yacc.c  */
-#line 490 "./calc.y"
+#line 453 "./calc.y"
     {
+        fprintf(stderr, "BISON: [var_item] Declaring scalar ID.\n");
         TokenValue *dummy;
-        /* Utilitzem 'current_type' en lloc de TYPE_INT/FLOAT directament */
         
         if (sym_lookup((yyvsp[(1) - (1)].sval), &dummy) != SYMTAB_NOT_FOUND) {
             yyerror("Error: Variable ja declarada.");
         } else {
             TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
-            val->type = current_type; /* <--- Aquí està la màgia */
+            val->type = current_type;
             val->size = 1;
             val->name = strdup((yyvsp[(1) - (1)].sval));
             val->offset = global_offset;
@@ -1983,16 +1965,17 @@ yyreduce:
   case 37:
 
 /* Line 1464 of yacc.c  */
-#line 509 "./calc.y"
+#line 472 "./calc.y"
     {
+        fprintf(stderr, "BISON: [var_item] Declaring ARRAY.\n");
         TokenValue *dummy;
         
         if (sym_lookup((yyvsp[(1) - (4)].sval), &dummy) != SYMTAB_NOT_FOUND) {
             yyerror("Error: Variable ja declarada.");
         } else {
             TokenValue *val = (TokenValue*) malloc(sizeof(TokenValue));
-            val->type = current_type; /* <--- Màgia */
-            val->size = (yyvsp[(3) - (4)].ival);           /* La mida és el número */
+            val->type = current_type;
+            val->size = (yyvsp[(3) - (4)].ival);          
             val->name = strdup((yyvsp[(1) - (4)].sval));
             val->offset = global_offset;
             global_offset += val->size;
@@ -2006,16 +1989,15 @@ yyreduce:
   case 38:
 
 /* Line 1464 of yacc.c  */
-#line 529 "./calc.y"
+#line 493 "./calc.y"
     { 
+        fprintf(stderr, "BISON: [assignation] ID := Expr.\n");
         TokenValue *s;
         struct TempValue *res = (yyvsp[(3) - (3)].expr); 
 
-        /* 1. Busquem la variable */
         if (sym_lookup((yyvsp[(1) - (3)].sval), &s) == SYMTAB_NOT_FOUND) {
             yyerror("Error: Variable no declarada");
         } else {
-            /* 2. Comprovem tipus */
             
             /* INT := INT o FLOAT := FLOAT */
             if (s->type == res->type) {
@@ -2033,18 +2015,18 @@ yyreduce:
             }
         }
         free((yyvsp[(1) - (3)].sval));
-        /* free(res); */
     ;}
     break;
 
   case 39:
 
 /* Line 1464 of yacc.c  */
-#line 557 "./calc.y"
+#line 519 "./calc.y"
     {
+        fprintf(stderr, "BISON: [assignation] ID[] := Expr.\n");
         TokenValue *s;
-        struct TempValue *idx = (yyvsp[(3) - (6)].expr); /* L'índex (dins els corxets) */
-        struct TempValue *val = (yyvsp[(6) - (6)].expr); /* El valor a guardar (dreta) */
+        struct TempValue *idx = (yyvsp[(3) - (6)].expr); 
+        struct TempValue *val = (yyvsp[(6) - (6)].expr); 
 
         if (sym_lookup((yyvsp[(1) - (6)].sval), &s) == SYMTAB_NOT_FOUND) {
             yyerror("Error: Array no declarat");
@@ -2056,7 +2038,6 @@ yyreduce:
             yyerror("Error: L'índex ha de ser enter");
         }
         else {
-            /* Comprovar tipus i fer CAST si cal (igual que assignació simple) */
             char *val_addr = val->addr;
             
             /* Si array és FLOAT i valor és INT -> I2F */
@@ -2080,7 +2061,7 @@ yyreduce:
 
 
 /* Line 1464 of yacc.c  */
-#line 2084 "calc.tab.c"
+#line 2065 "calc.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2292,7 +2273,7 @@ yyreturn:
 
 
 /* Line 1684 of yacc.c  */
-#line 593 "./calc.y"
+#line 555 "./calc.y"
 
 
 void yyerror(const char *s) {
@@ -2351,40 +2332,33 @@ void emit_array_store(char *arr_name, char *index, char *src) {
 
 int main(int argc, char **argv) {
     
-    /* 1. Comprobamos que nos pasen 2 argumentos (entrada y salida) */
     if (argc != 3) {
         fprintf(stderr, "Uso correcto: %s <fichero_entrada> <fichero_salida>\n", argv[0]);
         return 1;
     }
 
-    /* 2. Abrimos el archivo de ENTRADA en modo lectura ("r") */
     FILE *input = fopen(argv[1], "r");
     if (!input) {
         fprintf(stderr, "Error: No se pudo abrir el archivo de entrada '%s'\n", argv[1]);
         return 1;
     }
 
-    /* 3. Le decimos a Flex que lea de este archivo en vez de la consola */
     yyin = input;
 
-    /* 4. Redirigimos la SALIDA estándar (stdout) al archivo de salida */
-    /* De esta forma, todos tus printf() irán al archivo automáticamente */
+
     if (freopen(argv[2], "w", stdout) == NULL) {
         fprintf(stderr, "Error: No se pudo crear el archivo de salida '%s'\n", argv[2]);
         fclose(input);
         return 1;
     }
 
-    /* 5. (Opcional) Mensaje de inicio para el log de errores (stderr) */
     fprintf(stderr, "--- Iniciando Compilacion ---\n");
     fprintf(stderr, "Entrada: %s\n", argv[1]);
     fprintf(stderr, "Salida:  %s\n", argv[2]);
 
-    /* 6. Ejecutamos el parser */
     yyparse();
 
     printf("%d: HALT\n", instruction_line++);
-    /* 7. Cerramos el archivo de entrada (stdout se cierra solo al terminar) */
     fclose(input);
     
     fprintf(stderr, "--- Fin de la Compilacion ---\n");

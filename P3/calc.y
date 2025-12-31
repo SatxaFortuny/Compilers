@@ -78,13 +78,14 @@ void print_code_to_file();
 
 %%
 
-program: stmt_list ;
+program: stmt_list { fprintf(stderr, "BISON: [program] Parsing Finished.\n"); };
 
 marker: 
     { 
         /* USEM CALLOC PER NETEJAR MEMÒRIA */
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->instr = get_current_line(); 
+        fprintf(stderr, "BISON: [marker] M at line %d\n", $$->instr);
     }
     ;
 
@@ -96,26 +97,30 @@ stmt_list:
     ;
 
 line:
-    stmt EOL       { $$ = $1; }
-    | EOL          { $$ = NULL; }
-    | error EOL    { printf("Error sintàctic a línia %d\n", yylineno); yyerrok; $$ = NULL; }
+    stmt EOL       { fprintf(stderr, "BISON: [line] Stmt parsed.\n"); $$ = $1; }
+    | EOL          { fprintf(stderr, "BISON: [line] Empty line.\n"); $$ = NULL; }
+    | error EOL    { fprintf(stderr, "BISON: [line] Syntax Error recovered.\n"); yyerrok; $$ = NULL; }
     ;
 
 stmt:
     simple_expr { 
+        fprintf(stderr, "BISON: [stmt] Simple Expression (PUT).\n");
         emit("PARAM", $1->addr, NULL, NULL);
         if ($1->type == TYPE_INT) emit("CALL", "PUTI", "1", NULL);
         else emit("CALL", "PUTF", "1", NULL);
     }
     | declaration  { 
+        fprintf(stderr, "BISON: [stmt] Declaration.\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue)); 
     }
     | assignation  { 
+        fprintf(stderr, "BISON: [stmt] Assignation.\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue)); 
     }
     
     /* IF - THEN - FI */
     | IF expression THEN marker stmt_list FI {
+        fprintf(stderr, "BISON: [stmt] IF-THEN-FI.\n");
         backpatch($2->truelist, $4->instr);
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->nextlist = merge($2->falselist, $5 ? $5->nextlist : NULL);
@@ -125,11 +130,13 @@ stmt:
     /* IF - THEN - ELSE - FI */
     | IF expression THEN marker stmt_list ELSE 
       { 
+          fprintf(stderr, "BISON: [stmt] IF-THEN-ELSE (mid-rule).\n");
           $<expr>$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
           $<expr>$->nextlist = makelist(instruction_line); 
           emit("GOTO", NULL, NULL, NULL); 
       }
       marker stmt_list FI {
+          fprintf(stderr, "BISON: [stmt] IF-THEN-ELSE-FI finished.\n");
           struct TempValue *goto_exit = $<expr>7; 
           backpatch($2->truelist, $4->instr);
           backpatch($2->falselist, $8->instr);
@@ -141,6 +148,7 @@ stmt:
       }
     /* WHILE */
     | WHILE marker expression DO marker stmt_list DONE {
+        fprintf(stderr, "BISON: [stmt] WHILE loop.\n");
         backpatch($3->truelist, $5->instr);
         backpatch($6 ? $6->nextlist : NULL, $2->instr);
         emit_goto_line($2->instr);
@@ -151,6 +159,7 @@ stmt:
     }
     /* DO - UNTIL */
     | DO marker stmt_list UNTIL marker expression {
+        fprintf(stderr, "BISON: [stmt] DO-UNTIL loop.\n");
         backpatch($6->falselist, $2->instr);
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->nextlist = $6->truelist;
@@ -159,6 +168,7 @@ stmt:
     }
     /* FOR */
     | for_header marker stmt_list DONE {
+        fprintf(stderr, "BISON: [stmt] FOR loop end.\n");
         TokenValue *s;
         sym_lookup($1->addr, &s);
         
@@ -174,9 +184,10 @@ stmt:
     }
     /* SWITCH */
     | SWITCH expression EOL
-      { push_switch($2->addr); } 
+      { fprintf(stderr, "BISON: [stmt] SWITCH start.\n"); push_switch($2->addr); } 
       case_list FSWITCH 
       { 
+          fprintf(stderr, "BISON: [stmt] SWITCH end.\n");
           struct TempValue *cl = $5;
           backpatch(cl->nextlist, instruction_line);
           backpatch(cl->falselist, instruction_line);
@@ -184,6 +195,7 @@ stmt:
       }
     /* REPEAT */
     | loop_header stmt_list DONE {
+        fprintf(stderr, "BISON: [stmt] REPEAT loop end.\n");
         int start_line = $1->type; char *cnt = $1->addr;
         emit("SUBI", cnt, "1", cnt); emit_if_goto(cnt, start_line);
         free($1);
@@ -193,6 +205,7 @@ stmt:
 /* --- HELPER PEL FOR --- */
 for_header:
     FOR ID IN simple_expr RANGE simple_expr DO {
+        fprintf(stderr, "BISON: [for_header] Parsing FOR header for var %s.\n", $2);
         TokenValue *s;
         if (sym_lookup($2, &s) == SYMTAB_NOT_FOUND) yyerror("Variable del FOR no declarada");
         
@@ -210,6 +223,7 @@ for_header:
 case_list:
     case_item { $$ = $1; }
     | case_list marker case_item {
+        fprintf(stderr, "BISON: [case_list] Merging cases.\n");
         backpatch($1->falselist, $2->instr);
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->falselist = $3->falselist;
@@ -221,6 +235,7 @@ case_list:
 
 case_item:
     CASE NUMBER ':' stmt_list BREAK EOL {
+        fprintf(stderr, "BISON: [case_item] Case %d.\n", $2);
         char buf[20]; sprintf(buf, "%d", $2);
         struct ListInt *fail = makelist(instruction_line);
         emit("IFNE", get_switch(), buf, NULL);
@@ -233,7 +248,7 @@ case_item:
     ;
 
 declaration:
-    type_specifier var_list { $$ = NULL; }
+    type_specifier var_list { fprintf(stderr, "BISON: [declaration] Vars declared.\n"); $$ = NULL; }
     ;
 
 type_specifier:
@@ -249,6 +264,7 @@ var_list:
 
 var_item:
     ID {
+        fprintf(stderr, "BISON: [var_item] Declaring scalar %s.\n", $1);
         TokenValue *dummy;
         if (sym_lookup($1, &dummy) != SYMTAB_NOT_FOUND) yyerror("Variable repetida");
         else {
@@ -259,6 +275,7 @@ var_item:
         free($1);
     }
     | ID '[' NUMBER ']' {
+        fprintf(stderr, "BISON: [var_item] Declaring array %s[%d].\n", $1, $3);
         TokenValue *dummy;
         if (sym_lookup($1, &dummy) != SYMTAB_NOT_FOUND) yyerror("Variable repetida");
         else {
@@ -272,10 +289,10 @@ var_item:
 
 assignation:
     ID ASSIGN expression {
+        fprintf(stderr, "BISON: [assignation] Assigning to ID %s.\n", $1);
         TokenValue *s;
         if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) yyerror("Variable no declarada");
         else {
-            /* ARA NO PETARÀ PERQUÈ ESTEM USANT CALLOC (MEMÒRIA NETA) */
             if ($3->truelist) backpatch($3->truelist, instruction_line);
             if ($3->falselist) backpatch($3->falselist, instruction_line);
 
@@ -287,6 +304,7 @@ assignation:
         free($1);
     }
     | ID '[' expression ']' ASSIGN expression {
+        fprintf(stderr, "BISON: [assignation] Assigning to Array %s[].\n", $1);
         TokenValue *s;
         if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) yyerror("Array no declarat");
         else {
@@ -307,6 +325,7 @@ assignation:
 expression:
     bool_term { $$ = $1; }
     | expression OR marker bool_term {
+        fprintf(stderr, "BISON: [expression] OR operation.\n");
         backpatch($1->falselist, $3->instr);
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = TYPE_BOOL;
@@ -318,6 +337,7 @@ expression:
 bool_term:
     bool_factor { $$ = $1; }
     | bool_term AND marker bool_factor {
+        fprintf(stderr, "BISON: [bool_term] AND operation.\n");
         backpatch($1->truelist, $3->instr);
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = TYPE_BOOL;
@@ -329,6 +349,7 @@ bool_term:
 bool_factor:
     relation { $$ = $1; }
     | NOT bool_factor {
+        fprintf(stderr, "BISON: [bool_factor] NOT operation.\n");
         $$ = $2;
         struct ListInt *temp = $$->truelist;
         $$->truelist = $$->falselist;
@@ -338,48 +359,56 @@ bool_factor:
 relation:
     simple_expr { $$ = $1; }
     | simple_expr GT simple_expr {
+        fprintf(stderr, "BISON: [relation] GT (>).\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = TYPE_BOOL;
         $$->truelist = makelist(instruction_line); emit("IFGT", $1->addr, $3->addr, NULL);
         $$->falselist = makelist(instruction_line); emit("GOTO", NULL, NULL, NULL);
     }
     | simple_expr LT simple_expr {
+        fprintf(stderr, "BISON: [relation] LT (<).\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = TYPE_BOOL; 
         $$->truelist = makelist(instruction_line); emit("IFLT", $1->addr, $3->addr, NULL);
         $$->falselist = makelist(instruction_line); emit("GOTO", NULL, NULL, NULL);
     }
     | simple_expr EQ simple_expr {
+        fprintf(stderr, "BISON: [relation] EQ (==).\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = TYPE_BOOL; 
         $$->truelist = makelist(instruction_line); emit("IFEQ", $1->addr, $3->addr, NULL);
         $$->falselist = makelist(instruction_line); emit("GOTO", NULL, NULL, NULL);
     }
     | simple_expr GE simple_expr {
+        fprintf(stderr, "BISON: [relation] GE (>=).\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = TYPE_BOOL; 
         $$->truelist = makelist(instruction_line); emit("IFGE", $1->addr, $3->addr, NULL);
         $$->falselist = makelist(instruction_line); emit("GOTO", NULL, NULL, NULL);
     }
     | simple_expr LE simple_expr {
+        fprintf(stderr, "BISON: [relation] LE (<=).\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = TYPE_BOOL; 
         $$->truelist = makelist(instruction_line); emit("IFLE", $1->addr, $3->addr, NULL);
         $$->falselist = makelist(instruction_line); emit("GOTO", NULL, NULL, NULL);
     }
     | simple_expr NE simple_expr {
+        fprintf(stderr, "BISON: [relation] NE (!=).\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = TYPE_BOOL; 
         $$->truelist = makelist(instruction_line); emit("IFNE", $1->addr, $3->addr, NULL);
         $$->falselist = makelist(instruction_line); emit("GOTO", NULL, NULL, NULL);
     }
     | TRUE {
+        fprintf(stderr, "BISON: [relation] TRUE literal.\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = TYPE_BOOL;
         $$->addr = strdup("1");
         $$->truelist = makelist(instruction_line); emit("GOTO", NULL, NULL, NULL);
     }
     | FALSE {
+        fprintf(stderr, "BISON: [relation] FALSE literal.\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = TYPE_BOOL;
         $$->addr = strdup("0");
@@ -389,6 +418,7 @@ relation:
 simple_expr:
     term { $$ = $1; }
     | simple_expr '+' term {
+        fprintf(stderr, "BISON: [simple_expr] ADD.\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if ($1->type == TYPE_INT && $3->type == TYPE_INT) {
              $$->type = TYPE_INT; $$->addr = newTemp(); emit("ADDI", $1->addr, $3->addr, $$->addr);
@@ -400,6 +430,7 @@ simple_expr:
         }
     }
     | simple_expr '-' term {
+        fprintf(stderr, "BISON: [simple_expr] SUB.\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if ($1->type == TYPE_INT && $3->type == TYPE_INT) {
              $$->type = TYPE_INT; $$->addr = newTemp(); emit("SUBI", $1->addr, $3->addr, $$->addr);
@@ -414,6 +445,7 @@ simple_expr:
 term:
     unary { $$ = $1; }
     | term '*' unary {
+        fprintf(stderr, "BISON: [term] MUL.\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if ($1->type == TYPE_INT && $3->type == TYPE_INT) {
              $$->type = TYPE_INT; $$->addr = newTemp(); emit("MULI", $1->addr, $3->addr, $$->addr);
@@ -425,6 +457,7 @@ term:
         }
     }
     | term '/' unary {
+        fprintf(stderr, "BISON: [term] DIV.\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if ($1->type == TYPE_INT && $3->type == TYPE_INT) {
              $$->type = TYPE_INT; $$->addr = newTemp(); emit("DIVI", $1->addr, $3->addr, $$->addr);
@@ -436,6 +469,7 @@ term:
         }
     }
     | term '%' unary {
+        fprintf(stderr, "BISON: [term] MOD.\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if ($1->type == TYPE_INT && $3->type == TYPE_INT) {
             $$->type = TYPE_INT; $$->addr = newTemp(); emit("MODI", $1->addr, $3->addr, $$->addr);
@@ -448,6 +482,7 @@ term:
 unary:
     pow { $$ = $1; }
     | '-' unary {
+        fprintf(stderr, "BISON: [unary] Negative.\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = $2->type; $$->addr = newTemp();
         if ($2->type == TYPE_INT) emit_unary("CHSI", $2->addr, $$->addr);
@@ -458,6 +493,7 @@ unary:
 pow:
     atom { $$ = $1; }
     | atom POWER pow {
+        fprintf(stderr, "BISON: [pow] Power.\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = $1->type; $$->addr = newTemp();
         if ($$->type == TYPE_INT) emit_move("1", $$->addr); else emit_move("1.0", $$->addr);
@@ -465,16 +501,19 @@ pow:
     ;
 atom:
     NUMBER {
+        fprintf(stderr, "BISON: [atom] Number %d.\n", $1);
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = TYPE_INT; 
         char buf[20]; sprintf(buf, "%d", $1); $$->addr = strdup(buf);
     }
     | FLOAT_LITERAL {
+        fprintf(stderr, "BISON: [atom] Float %f.\n", $1);
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         $$->type = TYPE_FLOAT;
         char buf[30]; sprintf(buf, "%.5f", $1); $$->addr = strdup(buf);
     }
     | ID {
+        fprintf(stderr, "BISON: [atom] ID %s.\n", $1);
         TokenValue *s;
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
@@ -485,6 +524,7 @@ atom:
         free($1);
     }
     | ID '[' expression ']' {
+        fprintf(stderr, "BISON: [atom] Array Access %s[].\n", $1);
         TokenValue *s;
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if (sym_lookup($1, &s) == SYMTAB_NOT_FOUND) {
@@ -500,6 +540,7 @@ atom:
 
 loop_header:
     REPEAT expression DO {
+        fprintf(stderr, "BISON: [loop_header] REPEAT start.\n");
         $$ = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         char *counter = newTemp(); emit_move($2->addr, counter);
         $$->type = get_current_line(); $$->addr = counter;
@@ -583,7 +624,11 @@ int main(int argc, char **argv) {
     if (!input) return 1;
     yyin = input;
     freopen(argv[2], "w", stdout);
+    
+    fprintf(stderr, "BISON: Starting compilation of %s...\n", argv[1]);
     yyparse();
+    fprintf(stderr, "BISON: Compilation finished. Writing code to %s...\n", argv[2]);
+
     print_code_to_file();
     fclose(input);
     return 0;

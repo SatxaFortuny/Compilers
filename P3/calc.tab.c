@@ -535,13 +535,13 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    81,    81,    84,    92,    93,    99,   100,   101,   105,
-     110,   113,   118,   127,   126,   143,   153,   161,   177,   176,
-     186,   195,   212,   213,   220,   224,   237,   241,   242,   243,
-     247,   248,   252,   262,   275,   290,   310,   311,   321,   322,
-     332,   333,   341,   342,   348,   354,   360,   366,   372,   378,
-     384,   392,   393,   404,   417,   418,   429,   440,   451,   452,
-     458,   461,   462,   469,   474,   479,   489,   500,   504
+       0,    81,    81,    84,    93,    94,   100,   101,   102,   106,
+     112,   116,   122,   132,   131,   150,   161,   170,   187,   186,
+     197,   207,   224,   225,   233,   237,   251,   255,   256,   257,
+     261,   262,   266,   277,   291,   306,   326,   327,   338,   339,
+     350,   351,   360,   361,   368,   375,   382,   389,   396,   403,
+     410,   419,   420,   432,   446,   447,   459,   471,   483,   484,
+     491,   494,   495,   503,   509,   515,   526,   538,   542
 };
 #endif
 
@@ -1587,7 +1587,14 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 3:
+        case 2:
+
+/* Line 1464 of yacc.c  */
+#line 81 "./calc.y"
+    { fprintf(stderr, "BISON: [program] Parsing Finished.\n"); ;}
+    break;
+
+  case 3:
 
 /* Line 1464 of yacc.c  */
 #line 84 "./calc.y"
@@ -1595,20 +1602,21 @@ yyreduce:
         /* USEM CALLOC PER NETEJAR MEMÒRIA */
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->instr = get_current_line(); 
+        fprintf(stderr, "BISON: [marker] M at line %d\n", (yyval.expr)->instr);
     ;}
     break;
 
   case 4:
 
 /* Line 1464 of yacc.c  */
-#line 92 "./calc.y"
+#line 93 "./calc.y"
     { (yyval.expr) = NULL; ;}
     break;
 
   case 5:
 
 /* Line 1464 of yacc.c  */
-#line 93 "./calc.y"
+#line 94 "./calc.y"
     { 
         (yyval.expr) = (yyvsp[(2) - (2)].expr); 
     ;}
@@ -1617,29 +1625,30 @@ yyreduce:
   case 6:
 
 /* Line 1464 of yacc.c  */
-#line 99 "./calc.y"
-    { (yyval.expr) = (yyvsp[(1) - (2)].expr); ;}
+#line 100 "./calc.y"
+    { fprintf(stderr, "BISON: [line] Stmt parsed.\n"); (yyval.expr) = (yyvsp[(1) - (2)].expr); ;}
     break;
 
   case 7:
 
 /* Line 1464 of yacc.c  */
-#line 100 "./calc.y"
-    { (yyval.expr) = NULL; ;}
+#line 101 "./calc.y"
+    { fprintf(stderr, "BISON: [line] Empty line.\n"); (yyval.expr) = NULL; ;}
     break;
 
   case 8:
 
 /* Line 1464 of yacc.c  */
-#line 101 "./calc.y"
-    { printf("Error sintàctic a línia %d\n", yylineno); yyerrok; (yyval.expr) = NULL; ;}
+#line 102 "./calc.y"
+    { fprintf(stderr, "BISON: [line] Syntax Error recovered.\n"); yyerrok; (yyval.expr) = NULL; ;}
     break;
 
   case 9:
 
 /* Line 1464 of yacc.c  */
-#line 105 "./calc.y"
+#line 106 "./calc.y"
     { 
+        fprintf(stderr, "BISON: [stmt] Simple Expression (PUT).\n");
         emit("PARAM", (yyvsp[(1) - (1)].expr)->addr, NULL, NULL);
         if ((yyvsp[(1) - (1)].expr)->type == TYPE_INT) emit("CALL", "PUTI", "1", NULL);
         else emit("CALL", "PUTF", "1", NULL);
@@ -1649,8 +1658,9 @@ yyreduce:
   case 10:
 
 /* Line 1464 of yacc.c  */
-#line 110 "./calc.y"
+#line 112 "./calc.y"
     { 
+        fprintf(stderr, "BISON: [stmt] Declaration.\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue)); 
     ;}
     break;
@@ -1658,8 +1668,9 @@ yyreduce:
   case 11:
 
 /* Line 1464 of yacc.c  */
-#line 113 "./calc.y"
+#line 116 "./calc.y"
     { 
+        fprintf(stderr, "BISON: [stmt] Assignation.\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue)); 
     ;}
     break;
@@ -1667,8 +1678,9 @@ yyreduce:
   case 12:
 
 /* Line 1464 of yacc.c  */
-#line 118 "./calc.y"
+#line 122 "./calc.y"
     {
+        fprintf(stderr, "BISON: [stmt] IF-THEN-FI.\n");
         backpatch((yyvsp[(2) - (6)].expr)->truelist, (yyvsp[(4) - (6)].expr)->instr);
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->nextlist = merge((yyvsp[(2) - (6)].expr)->falselist, (yyvsp[(5) - (6)].expr) ? (yyvsp[(5) - (6)].expr)->nextlist : NULL);
@@ -1680,8 +1692,9 @@ yyreduce:
   case 13:
 
 /* Line 1464 of yacc.c  */
-#line 127 "./calc.y"
+#line 132 "./calc.y"
     { 
+          fprintf(stderr, "BISON: [stmt] IF-THEN-ELSE (mid-rule).\n");
           (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
           (yyval.expr)->nextlist = makelist(instruction_line); 
           emit("GOTO", NULL, NULL, NULL); 
@@ -1691,8 +1704,9 @@ yyreduce:
   case 14:
 
 /* Line 1464 of yacc.c  */
-#line 132 "./calc.y"
+#line 138 "./calc.y"
     {
+          fprintf(stderr, "BISON: [stmt] IF-THEN-ELSE-FI finished.\n");
           struct TempValue *goto_exit = (yyvsp[(7) - (10)].expr); 
           backpatch((yyvsp[(2) - (10)].expr)->truelist, (yyvsp[(4) - (10)].expr)->instr);
           backpatch((yyvsp[(2) - (10)].expr)->falselist, (yyvsp[(8) - (10)].expr)->instr);
@@ -1707,8 +1721,9 @@ yyreduce:
   case 15:
 
 /* Line 1464 of yacc.c  */
-#line 143 "./calc.y"
+#line 150 "./calc.y"
     {
+        fprintf(stderr, "BISON: [stmt] WHILE loop.\n");
         backpatch((yyvsp[(3) - (7)].expr)->truelist, (yyvsp[(5) - (7)].expr)->instr);
         backpatch((yyvsp[(6) - (7)].expr) ? (yyvsp[(6) - (7)].expr)->nextlist : NULL, (yyvsp[(2) - (7)].expr)->instr);
         emit_goto_line((yyvsp[(2) - (7)].expr)->instr);
@@ -1722,8 +1737,9 @@ yyreduce:
   case 16:
 
 /* Line 1464 of yacc.c  */
-#line 153 "./calc.y"
+#line 161 "./calc.y"
     {
+        fprintf(stderr, "BISON: [stmt] DO-UNTIL loop.\n");
         backpatch((yyvsp[(6) - (6)].expr)->falselist, (yyvsp[(2) - (6)].expr)->instr);
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->nextlist = (yyvsp[(6) - (6)].expr)->truelist;
@@ -1735,8 +1751,9 @@ yyreduce:
   case 17:
 
 /* Line 1464 of yacc.c  */
-#line 161 "./calc.y"
+#line 170 "./calc.y"
     {
+        fprintf(stderr, "BISON: [stmt] FOR loop end.\n");
         TokenValue *s;
         sym_lookup((yyvsp[(1) - (4)].expr)->addr, &s);
         
@@ -1755,15 +1772,16 @@ yyreduce:
   case 18:
 
 /* Line 1464 of yacc.c  */
-#line 177 "./calc.y"
-    { push_switch((yyvsp[(2) - (3)].expr)->addr); ;}
+#line 187 "./calc.y"
+    { fprintf(stderr, "BISON: [stmt] SWITCH start.\n"); push_switch((yyvsp[(2) - (3)].expr)->addr); ;}
     break;
 
   case 19:
 
 /* Line 1464 of yacc.c  */
-#line 179 "./calc.y"
+#line 189 "./calc.y"
     { 
+          fprintf(stderr, "BISON: [stmt] SWITCH end.\n");
           struct TempValue *cl = (yyvsp[(5) - (6)].expr);
           backpatch(cl->nextlist, instruction_line);
           backpatch(cl->falselist, instruction_line);
@@ -1774,8 +1792,9 @@ yyreduce:
   case 20:
 
 /* Line 1464 of yacc.c  */
-#line 186 "./calc.y"
+#line 197 "./calc.y"
     {
+        fprintf(stderr, "BISON: [stmt] REPEAT loop end.\n");
         int start_line = (yyvsp[(1) - (3)].expr)->type; char *cnt = (yyvsp[(1) - (3)].expr)->addr;
         emit("SUBI", cnt, "1", cnt); emit_if_goto(cnt, start_line);
         free((yyvsp[(1) - (3)].expr));
@@ -1785,8 +1804,9 @@ yyreduce:
   case 21:
 
 /* Line 1464 of yacc.c  */
-#line 195 "./calc.y"
+#line 207 "./calc.y"
     {
+        fprintf(stderr, "BISON: [for_header] Parsing FOR header for var %s.\n", (yyvsp[(2) - (7)].sval));
         TokenValue *s;
         if (sym_lookup((yyvsp[(2) - (7)].sval), &s) == SYMTAB_NOT_FOUND) yyerror("Variable del FOR no declarada");
         
@@ -1804,15 +1824,16 @@ yyreduce:
   case 22:
 
 /* Line 1464 of yacc.c  */
-#line 212 "./calc.y"
+#line 224 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 23:
 
 /* Line 1464 of yacc.c  */
-#line 213 "./calc.y"
+#line 225 "./calc.y"
     {
+        fprintf(stderr, "BISON: [case_list] Merging cases.\n");
         backpatch((yyvsp[(1) - (3)].expr)->falselist, (yyvsp[(2) - (3)].expr)->instr);
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->falselist = (yyvsp[(3) - (3)].expr)->falselist;
@@ -1824,15 +1845,16 @@ yyreduce:
   case 24:
 
 /* Line 1464 of yacc.c  */
-#line 220 "./calc.y"
+#line 233 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (2)].expr); ;}
     break;
 
   case 25:
 
 /* Line 1464 of yacc.c  */
-#line 224 "./calc.y"
+#line 237 "./calc.y"
     {
+        fprintf(stderr, "BISON: [case_item] Case %d.\n", (yyvsp[(2) - (6)].ival));
         char buf[20]; sprintf(buf, "%d", (yyvsp[(2) - (6)].ival));
         struct ListInt *fail = makelist(instruction_line);
         emit("IFNE", get_switch(), buf, NULL);
@@ -1847,36 +1869,37 @@ yyreduce:
   case 26:
 
 /* Line 1464 of yacc.c  */
-#line 237 "./calc.y"
-    { (yyval.expr) = NULL; ;}
+#line 251 "./calc.y"
+    { fprintf(stderr, "BISON: [declaration] Vars declared.\n"); (yyval.expr) = NULL; ;}
     break;
 
   case 27:
 
 /* Line 1464 of yacc.c  */
-#line 241 "./calc.y"
+#line 255 "./calc.y"
     { current_type = TYPE_INT; ;}
     break;
 
   case 28:
 
 /* Line 1464 of yacc.c  */
-#line 242 "./calc.y"
+#line 256 "./calc.y"
     { current_type = TYPE_FLOAT; ;}
     break;
 
   case 29:
 
 /* Line 1464 of yacc.c  */
-#line 243 "./calc.y"
+#line 257 "./calc.y"
     { current_type = TYPE_BOOL; ;}
     break;
 
   case 32:
 
 /* Line 1464 of yacc.c  */
-#line 252 "./calc.y"
+#line 266 "./calc.y"
     {
+        fprintf(stderr, "BISON: [var_item] Declaring scalar %s.\n", (yyvsp[(1) - (1)].sval));
         TokenValue *dummy;
         if (sym_lookup((yyvsp[(1) - (1)].sval), &dummy) != SYMTAB_NOT_FOUND) yyerror("Variable repetida");
         else {
@@ -1891,8 +1914,9 @@ yyreduce:
   case 33:
 
 /* Line 1464 of yacc.c  */
-#line 262 "./calc.y"
+#line 277 "./calc.y"
     {
+        fprintf(stderr, "BISON: [var_item] Declaring array %s[%d].\n", (yyvsp[(1) - (4)].sval), (yyvsp[(3) - (4)].ival));
         TokenValue *dummy;
         if (sym_lookup((yyvsp[(1) - (4)].sval), &dummy) != SYMTAB_NOT_FOUND) yyerror("Variable repetida");
         else {
@@ -1907,12 +1931,12 @@ yyreduce:
   case 34:
 
 /* Line 1464 of yacc.c  */
-#line 275 "./calc.y"
+#line 291 "./calc.y"
     {
+        fprintf(stderr, "BISON: [assignation] Assigning to ID %s.\n", (yyvsp[(1) - (3)].sval));
         TokenValue *s;
         if (sym_lookup((yyvsp[(1) - (3)].sval), &s) == SYMTAB_NOT_FOUND) yyerror("Variable no declarada");
         else {
-            /* ARA NO PETARÀ PERQUÈ ESTEM USANT CALLOC (MEMÒRIA NETA) */
             if ((yyvsp[(3) - (3)].expr)->truelist) backpatch((yyvsp[(3) - (3)].expr)->truelist, instruction_line);
             if ((yyvsp[(3) - (3)].expr)->falselist) backpatch((yyvsp[(3) - (3)].expr)->falselist, instruction_line);
 
@@ -1928,8 +1952,9 @@ yyreduce:
   case 35:
 
 /* Line 1464 of yacc.c  */
-#line 290 "./calc.y"
+#line 306 "./calc.y"
     {
+        fprintf(stderr, "BISON: [assignation] Assigning to Array %s[].\n", (yyvsp[(1) - (6)].sval));
         TokenValue *s;
         if (sym_lookup((yyvsp[(1) - (6)].sval), &s) == SYMTAB_NOT_FOUND) yyerror("Array no declarat");
         else {
@@ -1950,15 +1975,16 @@ yyreduce:
   case 36:
 
 /* Line 1464 of yacc.c  */
-#line 310 "./calc.y"
+#line 326 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 37:
 
 /* Line 1464 of yacc.c  */
-#line 311 "./calc.y"
+#line 327 "./calc.y"
     {
+        fprintf(stderr, "BISON: [expression] OR operation.\n");
         backpatch((yyvsp[(1) - (4)].expr)->falselist, (yyvsp[(3) - (4)].expr)->instr);
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_BOOL;
@@ -1971,15 +1997,16 @@ yyreduce:
   case 38:
 
 /* Line 1464 of yacc.c  */
-#line 321 "./calc.y"
+#line 338 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 39:
 
 /* Line 1464 of yacc.c  */
-#line 322 "./calc.y"
+#line 339 "./calc.y"
     {
+        fprintf(stderr, "BISON: [bool_term] AND operation.\n");
         backpatch((yyvsp[(1) - (4)].expr)->truelist, (yyvsp[(3) - (4)].expr)->instr);
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_BOOL;
@@ -1992,15 +2019,16 @@ yyreduce:
   case 40:
 
 /* Line 1464 of yacc.c  */
-#line 332 "./calc.y"
+#line 350 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 41:
 
 /* Line 1464 of yacc.c  */
-#line 333 "./calc.y"
+#line 351 "./calc.y"
     {
+        fprintf(stderr, "BISON: [bool_factor] NOT operation.\n");
         (yyval.expr) = (yyvsp[(2) - (2)].expr);
         struct ListInt *temp = (yyval.expr)->truelist;
         (yyval.expr)->truelist = (yyval.expr)->falselist;
@@ -2011,15 +2039,16 @@ yyreduce:
   case 42:
 
 /* Line 1464 of yacc.c  */
-#line 341 "./calc.y"
+#line 360 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 43:
 
 /* Line 1464 of yacc.c  */
-#line 342 "./calc.y"
+#line 361 "./calc.y"
     {
+        fprintf(stderr, "BISON: [relation] GT (>).\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_BOOL;
         (yyval.expr)->truelist = makelist(instruction_line); emit("IFGT", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, NULL);
@@ -2030,8 +2059,9 @@ yyreduce:
   case 44:
 
 /* Line 1464 of yacc.c  */
-#line 348 "./calc.y"
+#line 368 "./calc.y"
     {
+        fprintf(stderr, "BISON: [relation] LT (<).\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_BOOL; 
         (yyval.expr)->truelist = makelist(instruction_line); emit("IFLT", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, NULL);
@@ -2042,8 +2072,9 @@ yyreduce:
   case 45:
 
 /* Line 1464 of yacc.c  */
-#line 354 "./calc.y"
+#line 375 "./calc.y"
     {
+        fprintf(stderr, "BISON: [relation] EQ (==).\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_BOOL; 
         (yyval.expr)->truelist = makelist(instruction_line); emit("IFEQ", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, NULL);
@@ -2054,8 +2085,9 @@ yyreduce:
   case 46:
 
 /* Line 1464 of yacc.c  */
-#line 360 "./calc.y"
+#line 382 "./calc.y"
     {
+        fprintf(stderr, "BISON: [relation] GE (>=).\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_BOOL; 
         (yyval.expr)->truelist = makelist(instruction_line); emit("IFGE", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, NULL);
@@ -2066,8 +2098,9 @@ yyreduce:
   case 47:
 
 /* Line 1464 of yacc.c  */
-#line 366 "./calc.y"
+#line 389 "./calc.y"
     {
+        fprintf(stderr, "BISON: [relation] LE (<=).\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_BOOL; 
         (yyval.expr)->truelist = makelist(instruction_line); emit("IFLE", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, NULL);
@@ -2078,8 +2111,9 @@ yyreduce:
   case 48:
 
 /* Line 1464 of yacc.c  */
-#line 372 "./calc.y"
+#line 396 "./calc.y"
     {
+        fprintf(stderr, "BISON: [relation] NE (!=).\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_BOOL; 
         (yyval.expr)->truelist = makelist(instruction_line); emit("IFNE", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, NULL);
@@ -2090,8 +2124,9 @@ yyreduce:
   case 49:
 
 /* Line 1464 of yacc.c  */
-#line 378 "./calc.y"
+#line 403 "./calc.y"
     {
+        fprintf(stderr, "BISON: [relation] TRUE literal.\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_BOOL;
         (yyval.expr)->addr = strdup("1");
@@ -2102,8 +2137,9 @@ yyreduce:
   case 50:
 
 /* Line 1464 of yacc.c  */
-#line 384 "./calc.y"
+#line 410 "./calc.y"
     {
+        fprintf(stderr, "BISON: [relation] FALSE literal.\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_BOOL;
         (yyval.expr)->addr = strdup("0");
@@ -2114,15 +2150,16 @@ yyreduce:
   case 51:
 
 /* Line 1464 of yacc.c  */
-#line 392 "./calc.y"
+#line 419 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 52:
 
 /* Line 1464 of yacc.c  */
-#line 393 "./calc.y"
+#line 420 "./calc.y"
     {
+        fprintf(stderr, "BISON: [simple_expr] ADD.\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if ((yyvsp[(1) - (3)].expr)->type == TYPE_INT && (yyvsp[(3) - (3)].expr)->type == TYPE_INT) {
              (yyval.expr)->type = TYPE_INT; (yyval.expr)->addr = newTemp(); emit("ADDI", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, (yyval.expr)->addr);
@@ -2138,8 +2175,9 @@ yyreduce:
   case 53:
 
 /* Line 1464 of yacc.c  */
-#line 404 "./calc.y"
+#line 432 "./calc.y"
     {
+        fprintf(stderr, "BISON: [simple_expr] SUB.\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if ((yyvsp[(1) - (3)].expr)->type == TYPE_INT && (yyvsp[(3) - (3)].expr)->type == TYPE_INT) {
              (yyval.expr)->type = TYPE_INT; (yyval.expr)->addr = newTemp(); emit("SUBI", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, (yyval.expr)->addr);
@@ -2155,15 +2193,16 @@ yyreduce:
   case 54:
 
 /* Line 1464 of yacc.c  */
-#line 417 "./calc.y"
+#line 446 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 55:
 
 /* Line 1464 of yacc.c  */
-#line 418 "./calc.y"
+#line 447 "./calc.y"
     {
+        fprintf(stderr, "BISON: [term] MUL.\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if ((yyvsp[(1) - (3)].expr)->type == TYPE_INT && (yyvsp[(3) - (3)].expr)->type == TYPE_INT) {
              (yyval.expr)->type = TYPE_INT; (yyval.expr)->addr = newTemp(); emit("MULI", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, (yyval.expr)->addr);
@@ -2179,8 +2218,9 @@ yyreduce:
   case 56:
 
 /* Line 1464 of yacc.c  */
-#line 429 "./calc.y"
+#line 459 "./calc.y"
     {
+        fprintf(stderr, "BISON: [term] DIV.\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if ((yyvsp[(1) - (3)].expr)->type == TYPE_INT && (yyvsp[(3) - (3)].expr)->type == TYPE_INT) {
              (yyval.expr)->type = TYPE_INT; (yyval.expr)->addr = newTemp(); emit("DIVI", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, (yyval.expr)->addr);
@@ -2196,8 +2236,9 @@ yyreduce:
   case 57:
 
 /* Line 1464 of yacc.c  */
-#line 440 "./calc.y"
+#line 471 "./calc.y"
     {
+        fprintf(stderr, "BISON: [term] MOD.\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if ((yyvsp[(1) - (3)].expr)->type == TYPE_INT && (yyvsp[(3) - (3)].expr)->type == TYPE_INT) {
             (yyval.expr)->type = TYPE_INT; (yyval.expr)->addr = newTemp(); emit("MODI", (yyvsp[(1) - (3)].expr)->addr, (yyvsp[(3) - (3)].expr)->addr, (yyval.expr)->addr);
@@ -2211,15 +2252,16 @@ yyreduce:
   case 58:
 
 /* Line 1464 of yacc.c  */
-#line 451 "./calc.y"
+#line 483 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 59:
 
 /* Line 1464 of yacc.c  */
-#line 452 "./calc.y"
+#line 484 "./calc.y"
     {
+        fprintf(stderr, "BISON: [unary] Negative.\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = (yyvsp[(2) - (2)].expr)->type; (yyval.expr)->addr = newTemp();
         if ((yyvsp[(2) - (2)].expr)->type == TYPE_INT) emit_unary("CHSI", (yyvsp[(2) - (2)].expr)->addr, (yyval.expr)->addr);
@@ -2230,22 +2272,23 @@ yyreduce:
   case 60:
 
 /* Line 1464 of yacc.c  */
-#line 458 "./calc.y"
+#line 491 "./calc.y"
     { (yyval.expr) = (yyvsp[(2) - (2)].expr); ;}
     break;
 
   case 61:
 
 /* Line 1464 of yacc.c  */
-#line 461 "./calc.y"
+#line 494 "./calc.y"
     { (yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 62:
 
 /* Line 1464 of yacc.c  */
-#line 462 "./calc.y"
+#line 495 "./calc.y"
     {
+        fprintf(stderr, "BISON: [pow] Power.\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = (yyvsp[(1) - (3)].expr)->type; (yyval.expr)->addr = newTemp();
         if ((yyval.expr)->type == TYPE_INT) emit_move("1", (yyval.expr)->addr); else emit_move("1.0", (yyval.expr)->addr);
@@ -2255,8 +2298,9 @@ yyreduce:
   case 63:
 
 /* Line 1464 of yacc.c  */
-#line 469 "./calc.y"
+#line 503 "./calc.y"
     {
+        fprintf(stderr, "BISON: [atom] Number %d.\n", (yyvsp[(1) - (1)].ival));
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_INT; 
         char buf[20]; sprintf(buf, "%d", (yyvsp[(1) - (1)].ival)); (yyval.expr)->addr = strdup(buf);
@@ -2266,8 +2310,9 @@ yyreduce:
   case 64:
 
 /* Line 1464 of yacc.c  */
-#line 474 "./calc.y"
+#line 509 "./calc.y"
     {
+        fprintf(stderr, "BISON: [atom] Float %f.\n", (yyvsp[(1) - (1)].fval));
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         (yyval.expr)->type = TYPE_FLOAT;
         char buf[30]; sprintf(buf, "%.5f", (yyvsp[(1) - (1)].fval)); (yyval.expr)->addr = strdup(buf);
@@ -2277,8 +2322,9 @@ yyreduce:
   case 65:
 
 /* Line 1464 of yacc.c  */
-#line 479 "./calc.y"
+#line 515 "./calc.y"
     {
+        fprintf(stderr, "BISON: [atom] ID %s.\n", (yyvsp[(1) - (1)].sval));
         TokenValue *s;
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if (sym_lookup((yyvsp[(1) - (1)].sval), &s) == SYMTAB_NOT_FOUND) {
@@ -2293,8 +2339,9 @@ yyreduce:
   case 66:
 
 /* Line 1464 of yacc.c  */
-#line 489 "./calc.y"
+#line 526 "./calc.y"
     {
+        fprintf(stderr, "BISON: [atom] Array Access %s[].\n", (yyvsp[(1) - (4)].sval));
         TokenValue *s;
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         if (sym_lookup((yyvsp[(1) - (4)].sval), &s) == SYMTAB_NOT_FOUND) {
@@ -2310,15 +2357,16 @@ yyreduce:
   case 67:
 
 /* Line 1464 of yacc.c  */
-#line 500 "./calc.y"
+#line 538 "./calc.y"
     { (yyval.expr) = (yyvsp[(2) - (3)].expr); ;}
     break;
 
   case 68:
 
 /* Line 1464 of yacc.c  */
-#line 504 "./calc.y"
+#line 542 "./calc.y"
     {
+        fprintf(stderr, "BISON: [loop_header] REPEAT start.\n");
         (yyval.expr) = (struct TempValue*) calloc(1, sizeof(struct TempValue));
         char *counter = newTemp(); emit_move((yyvsp[(2) - (3)].expr)->addr, counter);
         (yyval.expr)->type = get_current_line(); (yyval.expr)->addr = counter;
@@ -2328,7 +2376,7 @@ yyreduce:
 
 
 /* Line 1464 of yacc.c  */
-#line 2332 "calc.tab.c"
+#line 2380 "calc.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2540,7 +2588,7 @@ yyreturn:
 
 
 /* Line 1684 of yacc.c  */
-#line 511 "./calc.y"
+#line 550 "./calc.y"
 
 
 void yyerror(const char *s) {
@@ -2618,7 +2666,11 @@ int main(int argc, char **argv) {
     if (!input) return 1;
     yyin = input;
     freopen(argv[2], "w", stdout);
+    
+    fprintf(stderr, "BISON: Starting compilation of %s...\n", argv[1]);
     yyparse();
+    fprintf(stderr, "BISON: Compilation finished. Writing code to %s...\n", argv[2]);
+
     print_code_to_file();
     fclose(input);
     return 0;
